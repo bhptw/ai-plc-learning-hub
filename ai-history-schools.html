@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 發展脈絡與學派 × AI產品對照</title>
+<style>
+:root{
+    --bg:#0f172a;
+    --panel:#111827;
+    --card:#1e293b;
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --accent:#38bdf8;
+    --line:#334155;
+}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+    background:linear-gradient(135deg,#020617,#0f172a);
+    color:var(--text);
+}
+.app{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    min-height:100vh;
+}
+.sidebar{
+    border-right:1px solid var(--line);
+    background:rgba(15,23,42,.95);
+    padding:20px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow:auto;
+}
+.sidebar h1{
+    font-size:18px;
+    line-height:1.4;
+    margin:0 0 20px;
+}
+.nav button{
+    width:100%;
+    text-align:left;
+    border:1px solid var(--line);
+    background:#111827;
+    color:var(--text);
+    padding:12px;
+    border-radius:12px;
+    margin:6px 0;
+    cursor:pointer;
+    font-size:14px;
+}
+.nav button.active,.nav button:hover{
+    border-color:var(--accent);
+    background:#0c4a6e;
+}
+.main{
+    padding:32px;
+}
+.slide{
+    display:none;
+    max-width:1100px;
+    margin:auto;
+    animation:fade .25s ease;
+}
+.slide.active{display:block}
+@keyframes fade{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:24px;
+    align-items:stretch;
+}
+.card{
+    background:rgba(30,41,59,.92);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:28px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+h2{
+    font-size:36px;
+    margin:0 0 12px;
+    line-height:1.2;
+}
+h3{
+    color:var(--accent);
+    font-size:22px;
+    margin:0 0 14px;
+}
+p,li{
+    font-size:18px;
+    line-height:1.75;
+}
+ul{padding-left:24px}
+.badge{
+    display:inline-block;
+    padding:6px 12px;
+    border:1px solid var(--accent);
+    color:#bae6fd;
+    border-radius:999px;
+    font-size:14px;
+    margin-bottom:16px;
+}
+.figure{
+    min-height:360px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#020617;
+    border-radius:22px;
+    border:1px solid var(--line);
+    overflow:hidden;
+}
+.figure svg{width:100%;height:100%;min-height:360px}
+.products{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+.product{
+    background:#0f172a;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    font-size:17px;
+}
+.controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:24px auto 0;
+    max-width:1100px;
+}
+.controls button{
+    border:0;
+    background:var(--accent);
+    color:#082f49;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+}
+.counter{color:var(--muted)}
+.note{
+    color:var(--muted);
+    font-size:15px;
+}
+@media(max-width:900px){
+    .app{grid-template-columns:1fr}
+    .sidebar{position:relative;height:auto}
+    .hero{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <h1>AI 發展脈絡與學派 × AI產品對照</h1>
+        <div class="nav" id="nav"></div>
+        <p class="note">操作：點左側章節，或使用上一頁 / 下一頁。</p>
+    </aside>
+    <main class="main" id="slides"></main>
+</div>
+
+<script>
+const svg = {
+timeline:`<svg viewBox="0 0 800 500" role="img" aria-label="1956 Dartmouth Conference">
+<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs>
+<rect width="800" height="500" fill="#020617"/>
+<circle cx="400" cy="210" r="120" fill="url(#g)" opacity=".22"/>
+<text x="400" y="175" text-anchor="middle" fill="#e5e7eb" font-size="72" font-weight="700">1956</text>
+<text x="400" y="235" text-anchor="middle" fill="#bae6fd" font-size="34">AI 元年</text>
+<line x1="120" y1="330" x2="680" y2="330" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/>
+<circle cx="400" cy="330" r="18" fill="#38bdf8"/>
+<text x="400" y="390" text-anchor="middle" fill="#e5e7eb" font-size="28">Dartmouth Conference</text>
+<text x="400" y="430" text-anchor="middle" fill="#94a3b8" font-size="22">Artificial Intelligence 成為研究領域</text>
+</svg>`,
+symbolism:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<rect x="95" y="90" width="610" height="320" rx="24" fill="#111827" stroke="#38bdf8" stroke-width="3"/>
+<text x="400" y="150" text-anchor="middle" fill="#e5e7eb" font-size="42" font-weight="700">IF → THEN</text>
+<path d="M170 245 H330 M470 245 H630" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+<rect x="330" y="205" width="140" height="80" rx="16" fill="#0c4a6e" stroke="#7dd3fc"/>
+<text x="400" y="255" text-anchor="middle" fill="#e0f2fe" font-size="26">Rule</text>
+<text x="400" y="345" text-anchor="middle" fill="#94a3b8" font-size="24">規則、邏輯推理、知識表示</text>
+</svg>`,
+connectionism:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<g stroke="#38bdf8" stroke-width="3" opacity=".75">
+<line x1="180" y1="130" x2="400" y2="100"/><line x1="180" y1="250" x2="400" y2="100"/><line x1="180" y1="370" x2="400" y2="100"/>
+<line x1="180" y1="130" x2="400" y2="250"/><line x1="180" y1="250" x2="400" y2="250"/><line x1="180" y1="370" x2="400" y2="250"/>
+<line x1="180" y1="130" x2="400" y2="400"/><line x1="180" y1="250" x2="400" y2="400"/><line x1="180" y1="370" x2="400" y2="400"/>
+<line x1="400" y1="100" x2="620" y2="250"/><line x1="400" y1="250" x2="620" y2="250"/><line x1="400" y1="400" x2="620" y2="250"/>
+</g>
+<g fill="#0c4a6e" stroke="#7dd3fc" stroke-width="4">
+<circle cx="180" cy="130" r="32"/><circle cx="180" cy="250" r="32"/><circle cx="180" cy="370" r="32"/>
+<circle cx="400" cy="100" r="32"/><circle cx="400" cy="250" r="32"/><circle cx="400" cy="400" r="32"/>
+<circle cx="620" cy="250" r="38"/>
+</g>
+<text x="400" y="470" text-anchor="middle" fill="#e5e7eb" font-size="28">神經網路與深度學習</text>
+</svg>`,
+behavior:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<rect x="80" y="210" width="160" height="90" rx="18" fill="#111827" stroke="#38bdf8" stroke-width="3"/>
+<rect x="320" y="210" width="160" height="90" rx="18" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="3"/>
+<rect x="560" y="210" width="160" height="90" rx="18" fill="#111827" stroke="#38bdf8" stroke-width="3"/>
+<text x="160" y="263" text-anchor="middle" fill="#e5e7eb" font-size="26">Input</text>
+<text x="400" y="263" text-anchor="middle" fill="#e5e7eb" font-size="26">Action</text>
+<text x="640" y="263" text-anchor="middle" fill="#e5e7eb" font-size="26">Reward</text>
+<path d="M245 255 H315 M485 255 H555" stroke="#38bdf8" stroke-width="6" marker-end="url(#arrow)"/>
+<path d="M640 205 C640 110 400 90 400 200" fill="none" stroke="#818cf8" stroke-width="5" stroke-dasharray="10 10"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/></marker></defs>
+<text x="400" y="380" text-anchor="middle" fill="#94a3b8" font-size="26">行為是否符合目標</text>
+</svg>`,
+frequentism:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<line x1="110" y1="390" x2="700" y2="390" stroke="#94a3b8" stroke-width="4"/>
+<line x1="110" y1="390" x2="110" y2="80" stroke="#94a3b8" stroke-width="4"/>
+<g fill="#38bdf8" opacity=".85">
+<rect x="155" y="315" width="55" height="75"/><rect x="225" y="250" width="55" height="140"/>
+<rect x="295" y="170" width="55" height="220"/><rect x="365" y="115" width="55" height="275"/>
+<rect x="435" y="170" width="55" height="220"/><rect x="505" y="250" width="55" height="140"/>
+<rect x="575" y="315" width="55" height="75"/>
+</g>
+<path d="M150 340 C250 130 520 130 640 340" fill="none" stroke="#818cf8" stroke-width="5"/>
+<text x="400" y="455" text-anchor="middle" fill="#e5e7eb" font-size="28">長期統計頻率與分佈</text>
+</svg>`,
+bayes:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<circle cx="190" cy="250" r="75" fill="#111827" stroke="#38bdf8" stroke-width="4"/>
+<circle cx="400" cy="250" r="75" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="4"/>
+<circle cx="610" cy="250" r="75" fill="#111827" stroke="#38bdf8" stroke-width="4"/>
+<text x="190" y="258" text-anchor="middle" fill="#e5e7eb" font-size="28">Prior</text>
+<text x="400" y="258" text-anchor="middle" fill="#e5e7eb" font-size="28">Data</text>
+<text x="610" y="258" text-anchor="middle" fill="#e5e7eb" font-size="28">Posterior</text>
+<path d="M265 250 H325 M475 250 H535" stroke="#38bdf8" stroke-width="6" marker-end="url(#arrow2)"/>
+<defs><marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/></marker></defs>
+<text x="400" y="390" text-anchor="middle" fill="#94a3b8" font-size="26">用新資料更新信念</text>
+</svg>`,
+backprop:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<path d="M120 250 H680" stroke="#38bdf8" stroke-width="6" marker-end="url(#a3)"/>
+<path d="M680 310 H120" stroke="#f472b6" stroke-width="6" marker-end="url(#a4)"/>
+<g fill="#0c4a6e" stroke="#7dd3fc" stroke-width="4">
+<circle cx="180" cy="250" r="45"/><circle cx="330" cy="250" r="45"/><circle cx="480" cy="250" r="45"/><circle cx="630" cy="250" r="45"/>
+</g>
+<text x="400" y="120" text-anchor="middle" fill="#e5e7eb" font-size="36" font-weight="700">Forward Prediction</text>
+<text x="400" y="380" text-anchor="middle" fill="#fbcfe8" font-size="32">Backward Error Update</text>
+<defs><marker id="a3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/></marker><marker id="a4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#f472b6"/></marker></defs>
+</svg>`,
+hybrid:`<svg viewBox="0 0 800 500"><rect width="800" height="500" fill="#020617"/>
+<circle cx="400" cy="250" r="90" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="4"/>
+<text x="400" y="240" text-anchor="middle" fill="#e5e7eb" font-size="30" font-weight="700">Hybrid AI</text>
+<text x="400" y="278" text-anchor="middle" fill="#bae6fd" font-size="22">現代 AI 融合架構</text>
+<g fill="#111827" stroke="#38bdf8" stroke-width="3">
+<circle cx="400" cy="80" r="55"/><circle cx="610" cy="180" r="55"/><circle cx="560" cy="390" r="55"/><circle cx="240" cy="390" r="55"/><circle cx="190" cy="180" r="55"/>
+</g>
+<g fill="#e5e7eb" font-size="20" text-anchor="middle">
+<text x="400" y="87">神經網路</text><text x="610" y="187">RLHF</text><text x="560" y="397">機率</text><text x="240" y="397">貝葉斯</text><text x="190" y="187">符號</text>
+</g>
+</svg>`
+};
+
+const slides = [
+{
+title:"1956 年通常被稱為「AI 元年」",
+badge:"AI 歷史起點",
+image:svg.timeline,
+points:[
+"1956 年 Dartmouth Conference 正式讓人工智慧成為獨立研究領域。",
+"Artificial Intelligence 一詞由 John McCarthy 等學者推動使用。",
+"這一頁的重點不是某個產品，而是 AI 學科的正式命名與起點。"
+],
+products:["Dartmouth Conference","John McCarthy","Artificial Intelligence"]
+},
+{
+title:"符號主義學派 Symbolism",
+badge:"規則、邏輯推理、知識表示",
+image:svg.symbolism,
+points:[
+"核心概念是把人類知識轉成明確規則，讓機器依照邏輯推理。",
+"適合法規、診斷、專家知識、工業規則等可結構化問題。",
+"缺點是規則維護成本高，遇到模糊語意與大量變化時容易失效。"
+],
+products:["IBM Watson","MYCIN","Google Knowledge Graph"]
+},
+{
+title:"連接主義學派 Connectionism",
+badge:"神經網路與資料學習",
+image:svg.connectionism,
+points:[
+"核心是神經網路，透過大量資料與權重調整學習模式。",
+"現代 LLM 幾乎都建立在深度神經網路與 Transformer 架構上。",
+"它不是靠人工逐條寫規則，而是從資料中學出統計關係。"
+],
+products:["ChatGPT","Claude","Gemini","Llama"]
+},
+{
+title:"行為主義學派 Behaviorism",
+badge:"輸入 → 行為 → 回饋",
+image:svg.behavior,
+points:[
+"核心是不先解釋內部結構，而是看輸入後的行為是否符合目標。",
+"強化學習是代表方法：透過獎勵與懲罰調整策略。",
+"在 LLM 中，RLHF，Reinforcement Learning from Human Feedback（人類回饋的強化學習） 可視為行為調教層，讓輸出更符合人類期待。"
+],
+products:["AlphaGo","OpenAI Five","InstructGPT","ChatGPT（使用 RLHF）"]
+},
+{
+title:"頻率學派 Frequentism",
+badge:"機率 = 長期統計頻率",
+image:svg.frequentism,
+points:[
+"核心是用大量觀測資料估計機率與模型參數。",
+"傳統機器學習常大量使用頻率學派方法。",
+"LLM 的下一詞預測也帶有頻率統計與機率建模的影子。"
+],
+products:["Logistic Regression","SVM","Random Forest","n-gram Language Model"]
+},
+{
+title:"貝葉斯學派 Bayesianism",
+badge:"先驗 + 資料 → 更新後信念",
+image:svg.bayes,
+points:[
+"核心是用先驗知識結合新資料，更新對事件的信念。",
+"適合處理不確定性、診斷推論與小樣本情境。",
+"在教學上可把 Prompt 視為提供先驗，模型回應則是根據上下文後的結果。"
+],
+products:["Bayesian Network","Naive Bayes Spam Filter","Probabilistic Diagnosis System"]
+},
+{
+title:"反向傳播算法 Backpropagation",
+badge:"多層神經網路訓練關鍵",
+image:svg.backprop,
+points:[
+"反向傳播解決了多層神經網路如何有效訓練的問題。",
+"先正向計算預測結果，再反向傳遞誤差，逐層調整權重。",
+"它是深度學習能夠大規模發展的重要基礎。"
+],
+products:["Multi-layer Neural Network","Deep Learning","Transformer Training"]
+},
+{
+title:"現代 AI 本質：Hybrid AI",
+badge:"多學派融合",
+image:svg.hybrid,
+points:[
+"現代 AI 不是單一學派，而是多種思想與技術融合。",
+"LLM 以連接主義為核心，但同時結合 RLHF、機率建模、工具使用與知識整合。",
+"真正有工程價值的 AI 系統，通常不是只會回答，而是能和規則、資料、工具、流程整合。"
+],
+products:["ChatGPT","Claude","Gemini","Llama","Knowledge Tools"]
+}
+];
+
+const slidesEl = document.getElementById("slides");
+const navEl = document.getElementById("nav");
+let current = 0;
+
+function render(){
+    navEl.innerHTML = slides.map((s,i)=>`<button class="${i===current?'active':''}" onclick="go(${i})">${i+1}. ${s.title}</button>`).join("");
+    slidesEl.innerHTML = slides.map((s,i)=>`
+        <section class="slide ${i===current?'active':''}">
+            <div class="hero">
+                <div class="card">
+                    <span class="badge">${s.badge}</span>
+                    <h2>${s.title}</h2>
+                    <h3>重點說明</h3>
+                    <ul>${s.points.map(p=>`<li>${p}</li>`).join("")}</ul>
+                    <h3>代表 AI 產品 / 技術</h3>
+                    <div class="products">${s.products.map(p=>`<div class="product">${p}</div>`).join("")}</div>
+                </div>
+                <div class="card">
+                    <div class="figure">${s.image}</div>
+                    <p class="note">本頁圖片為教學用向量示意圖，避免外部圖片授權與離線載入問題。</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="prev()">上一頁</button>
+                <div class="counter">${i+1} / ${slides.length}</div>
+                <button onclick="next()">下一頁</button>
+            </div>
+        </section>
+    `).join("");
+}
+function go(i){current=i;render();}
+function next(){current=(current+1)%slides.length;render();}
+function prev(){current=(current-1+slides.length)%slides.length;render();}
+document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowRight") next();
+    if(e.key==="ArrowLeft") prev();
+});
+render();
+</script>
+</body>
+</html>

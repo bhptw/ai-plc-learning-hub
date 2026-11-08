@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AI、工業自動化、PLC、SCL、Prompt 工程與 K-map 的互動式教學網站。">
+<title>AI × PLC 工業自動化互動學習平台</title>
+<style>
+:root{--bg:#07111f;--panel:#101d32;--card:#14243b;--line:#2b405c;--text:#edf5ff;--muted:#acc0d7;--accent:#54c8ff;--green:#54dfaa}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 10% 0%,#163c63 0,transparent 40%),linear-gradient(145deg,#07111f,#0c1830 55%,#040b16);font-family:system-ui,'Microsoft JhengHei','Noto Sans TC',sans-serif}
+header{padding:32px max(22px,calc((100vw - 1200px)/2));border-bottom:1px solid var(--line)}
+.brand{font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700}h1{font-size:clamp(28px,4vw,48px);line-height:1.25;margin:17px 0 16px}.intro{max-width:850px;color:var(--muted);font-size:17px;line-height:1.75;margin:0}
+main{max-width:1244px;padding:28px 22px 64px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.top h2{font-size:22px;margin:0}.count{font-size:14px;color:var(--muted)}.filters{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 24px}button.filter{background:#0d1d33;border:1px solid var(--line);color:var(--muted);padding:10px 14px;border-radius:999px;cursor:pointer;font-size:14px}button.filter.active,button.filter:hover{border-color:var(--accent);color:white;background:#133654}button:focus-visible,a:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.course-card{display:flex;flex-direction:column;min-height:230px;text-decoration:none;color:var(--text);padding:24px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(155deg,#172c48,#0d1b30);transition:transform .18s,border-color .18s,box-shadow .18s}.course-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 14px 32px #0005}.category{font-size:12px;font-weight:700;color:var(--green)}.course-card h3{margin:12px 0 9px;font-size:20px;line-height:1.4}.course-card p{margin:0;color:var(--muted);line-height:1.65;flex:1;font-size:14px}.launch{margin-top:18px;color:var(--accent);font-weight:700;font-size:14px}.course-card[hidden]{display:none}footer{text-align:center;border-top:1px solid var(--line);padding:24px;color:var(--muted);font-size:13px}
+@media(max-width:920px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.grid{grid-template-columns:1fr}header{padding:26px 20px}.course-card{min-height:195px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.course-card{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="brand">Industrial Automation Learning Hub</div><h1>AI × PLC<br>工業自動化互動學習平台</h1><p class="intro">從人工智慧發展、PLC 與神經網路，到 Prompt 工程、SCL 程式設計與 K-map 邏輯簡化。依主題選擇教材，每一頁均可獨立開啟與操作。</p></header>
+<main><div class="top"><h2>互動教材</h2><span class="count" id="course-count" aria-live="polite">共 8 個單元</span></div><nav class="filters" aria-label="教材分類"><button type="button" data-filter="全部" class="filter active" aria-pressed="true">全部</button><button type="button" data-filter="AI 基礎" class="filter " aria-pressed="false">AI 基礎</button><button type="button" data-filter="AI 與工業" class="filter " aria-pressed="false">AI 與工業</button><button type="button" data-filter="工程思維" class="filter " aria-pressed="false">工程思維</button><button type="button" data-filter="Prompt 工程" class="filter " aria-pressed="false">Prompt 工程</button><button type="button" data-filter="PLC 程式" class="filter " aria-pressed="false">PLC 程式</button><button type="button" data-filter="數位邏輯" class="filter " aria-pressed="false">數位邏輯</button></nav><div class="grid" id="course-grid"><a class="course-card" href="ai-history-schools.html" data-category="AI 基礎">
+<span class="category">AI 基礎</span><h3>AI 發展脈絡與學派</h3><p>認識人工智慧發展、主要學派與代表技術。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="ai-industry40-plc-scl.html" data-category="AI 與工業">
+<span class="category">AI 與工業</span><h3>AI × 工業 4.0 × PLC × SCL</h3><p>以雙軌時間線理解 AI 與工業自動化的演進。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="factoryio-reverse-learning.html" data-category="工程思維">
+<span class="category">工程思維</span><h3>Factory I/O 反向學習</h3><p>從輸出結果回推控制條件，建立反向學習方法。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="plc-neural-networks.html" data-category="AI 與工業">
+<span class="category">AI 與工業</span><h3>PLC 系統與神經網路</h3><p>比較確定性控制與機率學習系統。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="plc-ai-prompt-framework.html" data-category="Prompt 工程">
+<span class="category">Prompt 工程</span><h3>PLC × AI Prompt 工程框架</h3><p>認識 Markdown、Prompt 架構與工程生成規範。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="scl-interactive-course.html" data-category="PLC 程式">
+<span class="category">PLC 程式</span><h3>SCL 入門互動課程</h3><p>從 I/O 指定、區域變數到 SCL 程式結構。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="kmap-learning-map.html" data-category="數位邏輯">
+<span class="category">數位邏輯</span><h3>K-map 互動教學地圖</h3><p>從真值表到 K-map 與 SCL 邏輯實作。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a>
+<a class="course-card" href="kmap-simplification.html" data-category="數位邏輯">
+<span class="category">數位邏輯</span><h3>K-map 消除技巧專章</h3><p>練習四變數 K-map 群組與變數消除。</p><span class="launch">進入教材 <span aria-hidden="true">↗</span></span>
+</a></div></main>
+<footer>AI × PLC 工業自動化互動學習平台 · GitHub Pages 靜態網站</footer>
+<script>
+'use strict';
+const filterButtons = document.querySelectorAll('[data-filter]');
+const courseCards = document.querySelectorAll('[data-category]');
+filterButtons.forEach(button => button.addEventListener('click', () => {
+  const category = button.dataset.filter;
+  filterButtons.forEach(item => { const active=item === button; item.classList.toggle('active',active); item.setAttribute('aria-pressed', String(active)); });
+  let count = 0;
+  courseCards.forEach(card => { const shown=category==='全部'||card.dataset.category===category; card.hidden=!shown; if(shown) count++; });
+  document.getElementById('course-count').textContent = `共 ${count} 個單元`;
+}));
+</script>
+</body></html>

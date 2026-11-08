@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCL 入門互動課程</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1f2937;
+            --card2: #0b1220;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --line: #334155;
+            --accent: #38bdf8;
+            --accent2: #22c55e;
+            --warn: #f59e0b;
+            --code: #020617;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 55%, #020617 100%);
+            color: var(--text);
+        }
+
+        .app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 290px 1fr 420px;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .sidebar,
+        .main,
+        .code-panel {
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+        }
+
+        .sidebar {
+            padding: 18px;
+            overflow-y: auto;
+            max-height: calc(100vh - 32px);
+        }
+
+        .brand {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            margin: 0 0 8px;
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .lesson-btn {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: var(--card2);
+            color: var(--text);
+            text-align: left;
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.18s;
+        }
+
+        .lesson-btn:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .lesson-btn.active {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(34, 197, 94, 0.12));
+        }
+
+        .lesson-btn strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .lesson-btn span {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .main {
+            padding: 22px;
+            overflow: hidden;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .main-header h2 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .main-header p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .badge {
+            white-space: nowrap;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .flow-area {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.72));
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 22px;
+            min-height: 320px;
+            margin-bottom: 18px;
+        }
+
+        .io-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 1fr;
+            align-items: center;
+            gap: 20px;
+            margin: 26px 0;
+        }
+
+        .node {
+            border: 1px solid var(--line);
+            background: var(--card);
+            border-radius: 18px;
+            padding: 18px;
+            text-align: center;
+            min-height: 112px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .node:hover,
+        .node.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.10);
+            transform: translateY(-2px);
+        }
+
+        .node .tag {
+            font-family: Consolas, monospace;
+            font-size: 22px;
+            color: #f8fafc;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+        }
+
+        .node .desc {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .arrow {
+            text-align: center;
+            color: var(--accent);
+            font-size: 40px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.55; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.08); }
+        }
+
+        .mapping {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .mapping-card {
+            background: rgba(2, 6, 23, 0.65);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .mapping-card h3 {
+            margin: 0 0 8px;
+            font-size: 15px;
+            color: var(--accent2);
+        }
+
+        .mapping-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .explain-box {
+            background: rgba(2, 6, 23, 0.55);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px;
+            min-height: 106px;
+        }
+
+        .explain-box h3 {
+            margin: 0 0 10px;
+            color: var(--accent);
+            font-size: 17px;
+        }
+
+        .explain-box p {
+            margin: 0;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .code-panel {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .code-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .code-head h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .copy-btn {
+            border: 1px solid var(--accent);
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .copy-btn:hover {
+            background: rgba(56, 189, 248, 0.22);
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: var(--code);
+            border: 1px solid var(--line);
+            color: #dbeafe;
+            border-radius: 16px;
+            padding: 16px;
+            line-height: 1.6;
+            font-size: 14px;
+            overflow: auto;
+        }
+
+        code {
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .notes {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            background: rgba(31, 41, 55, 0.68);
+        }
+
+        .notes h3 {
+            margin: 0 0 10px;
+            font-size: 15px;
+            color: var(--warn);
+        }
+
+        .notes ul {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 13px;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .symbol-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            cursor: pointer;
+        }
+
+        .symbol-card:hover,
+        .symbol-card.active {
+            border-color: var(--accent);
+        }
+
+        .symbol-card strong {
+            display: block;
+            font-family: Consolas, monospace;
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .symbol-card span {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 1100px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                max-height: none;
+            }
+
+            .io-row {
+                grid-template-columns: 1fr;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>SCL 入門互動課程</h1>
+                <p>完整課程原型版。每頁保留可複製 SCL，適合投影教學與學生練習。</p>
+            </div>
+            <div id="lessonButtons"></div>
+        </aside>
+
+        <main class="main">
+            <div class="main-header">
+                <div>
+                    <h2 id="lessonTitle"></h2>
+                    <p id="lessonSubtitle"></p>
+                </div>
+                <div class="badge" id="lessonBadge"></div>
+            </div>
+
+            <section class="flow-area">
+                <div class="io-row">
+                    <div class="node" data-topic="left">
+                        <div class="tag" id="leftNodeTag"></div>
+                        <div class="desc" id="leftNodeDesc"></div>
+                    </div>
+                    <div class="arrow">:=</div>
+                    <div class="node" data-topic="right">
+                        <div class="tag" id="rightNodeTag"></div>
+                        <div class="desc" id="rightNodeDesc"></div>
+                    </div>
+                </div>
+
+                <div class="mapping" id="mappingArea"></div>
+                <div class="symbol-grid" id="symbolGrid"></div>
+            </section>
+
+            <section class="explain-box">
+                <h3 id="explainTitle"></h3>
+                <p id="explainText"></p>
+            </section>
+        </main>
+
+        <aside class="code-panel">
+            <div class="code-head">
+                <h2>可複製 SCL 代碼</h2>
+                <button class="copy-btn" id="copyBtn">複製代碼</button>
+            </div>
+            <pre><code id="codeBlock"></code></pre>
+            <div class="notes">
+                <h3>講師提示</h3>
+                <ul id="teacherNotes"></ul>
+            </div>
+            <div class="notes">
+                <h3>學生練習</h3>
+                <ul id="practiceNotes"></ul>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const lessons = [
+            {
+                id: 1,
+                title: '第 1 課：I/O 直通',
+                subtitle: '從 "Output" := "Start" 理解一行 SCL 如何控制實體輸出。',
+                badge: 'Syntax Layer',
+                leftTag: '"Start"',
+                leftDesc: '輸入條件，對應 I0.0，資料型態 Bool。',
+                rightTag: '"Output"',
+                rightDesc: '實體輸出，對應 Q0.0，資料型態 Bool。',
+                code: '"Output" := "Start"',
+                explainTitle: '教學重點',
+                explainText: '這一課先讓學生理解一件事：SCL 可以把右邊的條件值指定到左邊的輸出。',
+                mapping: [['Tag 對應', '"Start" 是 PLC Tag Table 的名稱，對應 I0.0。'], ['輸出對應', '"Output" 是 PLC Tag Table 的名稱，對應 Q0.0。']],
+                symbols: [['""', '全域變數，通常來自 PLC Tag Table。', 'quotes'], [':=', '賦值，把右邊結果送到左邊。', 'assign'], [';', '語句結束。', 'semicolon']],
+                teacher: ['不要用 "Output" = Q0.0 = Bool 這種說法。', '建議說："Output" 對應 Q0.0，資料型態為 Bool。', '這一課的核心是資料流。'],
+                practice: ['建立 Bool Tag："Start" 對應 I0.0。', '建立 Bool Tag："Output" 對應 Q0.0。', '按下 Start，觀察 Output 是否跟著變化。'],
+                topics: { left: ['"Start"', '這是輸入條件。教學時要說它對應 I0.0。'], right: ['"Output"', '這是實體輸出。程式把右邊的 Bool 狀態送到這個輸出 Tag。'], quotes: ['""', '雙引號通常表示全域 Tag 名稱。'], assign: [':=', '這是 SCL 的賦值符號。'], semicolon: [';', '分號代表一條語句結束。'] }
+            },
+            {
+                id: 2,
+                title: '第 2 課：內部變數',
+                subtitle: '加入 #RunCmd，建立邏輯層與 I/O 層分離的觀念。',
+                badge: 'Logic Layer',
+                leftTag: '"Start"',
+                leftDesc: '全域輸入 Tag，對應 I0.0。',
+                rightTag: '#RunCmd → "Output"',
+                rightDesc: '先存到內部邏輯變數，再送到實體輸出。',
+                code: '#RunCmd := "Start";\n"Output" := #RunCmd;',
+                explainTitle: '教學重點',
+                explainText: '這一課的重點是內部變數。#RunCmd 是邏輯層，"Output" 是 I/O 層。',
+                mapping: [['#RunCmd 的定位', '#RunCmd 是 FB 內部的區域變數。'], ['分層設計', '第一行產生邏輯結果，第二行把結果送到輸出。']],
+                symbols: [['#', '區域變數，通常存在於 FB/FC 內。', 'hash'], [':=', '第一行做邏輯指定，第二行做輸出指定。', 'assign'], [';', '每一條 SCL 指令都要明確結束。', 'semicolon']],
+                teacher: ['這一課先不要進入自保持。', '先建立 #RunCmd 是內部邏輯結果的觀念。', '第 3 課再進入完整結構。'],
+                practice: ['建立區域 Bool 變數：#RunCmd。', '將 "Start" 的狀態先指定給 #RunCmd。', '再把 #RunCmd 指定給 "Output"。'],
+                topics: { left: ['"Start"', '它仍然是全域輸入 Tag。'], right: ['#RunCmd → "Output"', '#RunCmd 負責決策，"Output" 負責對外執行。'], hash: ['#', '# 代表區域變數。'], assign: [':=', '這兩行都有賦值。'], semicolon: [';', '兩行程式就需要兩個分號。'] }
+            },
+            {
+                id: 3,
+                title: '第 3 課：FUNCTION_BLOCK "FC_Basic"',
+                subtitle: '先理解最小可執行結構：FUNCTION_BLOCK、VAR、BEGIN、END_FUNCTION_BLOCK。',
+                badge: 'Block Structure',
+                leftTag: 'FUNCTION_BLOCK "FC_Basic"',
+                leftDesc: '建立第一個 SCL 程式容器。',
+                rightTag: 'BEGIN',
+                rightDesc: '主程式區開始。',
+                code: 'FUNCTION_BLOCK "FC_Basic"\nVAR_INPUT\n    Start : Bool;\nEND_VAR\n\nVAR_OUTPUT\n    Output : Bool;\nEND_VAR\n\nBEGIN\n    #Output := #Start;\nEND_FUNCTION_BLOCK',
+                explainTitle: '核心觀念',
+                explainText: '這一課先讓學生知道：SCL 不是只寫一行指令，而是必須放在可執行的程式結構中。FUNCTION_BLOCK 是容器，BEGIN 後面才是主程式區。',
+                mapping: [['FUNCTION_BLOCK', '宣告一個功能區塊名稱。'], ['BEGIN', '主程式區開始，邏輯寫在這裡。']],
+                symbols: [['VAR_INPUT', '輸入變數宣告區。', 'varinput'], ['VAR_OUTPUT', '輸出變數宣告區。', 'varoutput'], ['END_FUNCTION_BLOCK', '功能區塊結束。', 'endfb']],
+                teacher: ['先讓學生建立完整程式骨架。', '說明宣告區與主程式區不同。', '這一課只放一行最簡單的指定邏輯。'],
+                practice: ['建立 FUNCTION_BLOCK "FC_Basic"。', '宣告 Start 與 Output。', '在 BEGIN 後寫入 #Output := #Start;。'],
+                topics: { left: ['FUNCTION_BLOCK "FC_Basic"', '這是第一個範例用的功能區塊名稱。'], right: ['BEGIN', 'BEGIN 後面才是 PLC 實際執行的主程式。'], varinput: ['VAR_INPUT', '外部輸入變數宣告區。'], varoutput: ['VAR_OUTPUT', '外部輸出變數宣告區。'], endfb: ['END_FUNCTION_BLOCK', '功能區塊的結束標記。'] }
+            },
+            {
+                id: 4,
+                title: '第 4 課：FUNCTION_BLOCK "FB_Basic"',
+                subtitle: '用 FB_Basic 建立更標準的區域變數與 I/O 分層。',
+                badge: 'FB Structure',
+                leftTag: 'VAR_INPUT / VAR_OUTPUT / VAR',
+                leftDesc: '輸入、輸出、內部變數分區。',
+                rightTag: '#RunCmd → #Output',
+                rightDesc: '先產生內部邏輯，再送到輸出。',
+                code: 'FUNCTION_BLOCK "FB_Basic"\nVAR_INPUT\n    Start : Bool;\nEND_VAR\n\nVAR_OUTPUT\n    Output : Bool;\nEND_VAR\n\nVAR\n    RunCmd : Bool;\nEND_VAR\n\nBEGIN\n    #RunCmd := #Start;\n    #Output := #RunCmd;\nEND_FUNCTION_BLOCK',
+                explainTitle: '核心觀念',
+                explainText: '第 4 課開始加入 VAR 區域變數。#RunCmd 是內部邏輯層，#Output 是輸出層，這是後續自保持、Timer、CASE 的基礎。',
+                mapping: [['VAR', '內部變數宣告區。'], ['分層設計', '先決策，再輸出。']],
+                symbols: [['#RunCmd', '內部邏輯結果。', 'runcmd'], ['#Output', 'FB 輸出變數。', 'output'], ['VAR', '區域變數宣告區。', 'var']],
+                teacher: ['讓學生理解 FB 內部可以有自己的記憶變數。', '這一課仍不進入自保持。', '重點是 I/O 層與邏輯層分離。'],
+                practice: ['建立 FUNCTION_BLOCK "FB_Basic"。', '新增 VAR 內部變數 RunCmd。', '觀察 #RunCmd 與 #Output 的關係。'],
+                topics: { left: ['變數分區', 'VAR_INPUT、VAR_OUTPUT、VAR 的角色不同。'], right: ['#RunCmd → #Output', '內部邏輯結果再送到輸出。'], runcmd: ['#RunCmd', 'FB 內部邏輯變數。'], output: ['#Output', 'FB 的輸出變數。'], var: ['VAR', 'FB 內部變數宣告區。'] }
+            },
+            {
+                id: 5,
+                title: '第 5 課：基本布林邏輯與自保持',
+                subtitle: 'AND、OR、NOT 與 Start/Stop 自保持控制。',
+                badge: 'Boolean + Latch',
+                leftTag: '#Start / #RunCmd / #Stop',
+                leftDesc: '啟動、記憶、停止條件。',
+                rightTag: '#RunCmd → #Output',
+                rightDesc: '布林運算結果控制輸出。',
+                code: '#RunCmd := (#Start OR #RunCmd) AND NOT #Stop;\n#Output := #RunCmd;',
+                explainTitle: '核心觀念',
+                explainText: '這一課把基本布林邏輯與自保持合併教學。OR 建立啟動或維持條件，AND NOT #Stop 建立停止優先條件。',
+                mapping: [['OR', 'Start 成立或 RunCmd 已成立，都可維持命令。'], ['AND NOT', 'Stop 成立時會強制切斷 RunCmd。']],
+                symbols: [['AND', '且，限制條件。', 'and'], ['OR', '或，啟動或維持。', 'or'], ['NOT', '反相，常用於停止條件。', 'not']],
+                teacher: ['先講 AND、OR、NOT，再解釋整行自保持。', '強調 Stop 必須具備關閉優先權。'],
+                practice: ['按下 Start 後放開，觀察 #RunCmd 是否保持。', '按下 Stop，確認 #Output 立即 OFF。', '用 Watch Table 觀察 #Start、#RunCmd、#Stop。'],
+                topics: { left: ['條件來源', 'Start 是啟動，RunCmd 是記憶，Stop 是中斷。'], right: ['輸出結果', 'Output 不直接判斷條件，而是接收 #RunCmd。'], and: ['AND', '所有條件都成立才成立。'], or: ['OR', '任一條件成立即成立，適合用來建立啟動或保持。'], not: ['NOT', '將 Stop 反相後作為允許運轉條件。'] }
+            },
+            {
+                id: 6,
+                title: '第 6 課：自保持 Latch',
+                subtitle: 'Start 設定、Stop 重置，說明 Reset 優先。',
+                badge: 'Latch',
+                leftTag: 'Set / Reset',
+                leftDesc: '啟動與重置。',
+                rightTag: '#RunCmd',
+                rightDesc: '記憶狀態。',
+                code: 'IF #Stop THEN\n    #RunCmd := FALSE;\nELSIF #Start THEN\n    #RunCmd := TRUE;\nEND_IF;\n\n"Output" := #RunCmd;',
+                explainTitle: '核心觀念',
+                explainText: 'Latch 的工程重點不是保持，而是 Reset 必須優先。',
+                mapping: [['Set', 'Start 成立時設定為 TRUE。'], ['Reset', 'Stop 成立時強制為 FALSE。']],
+                symbols: [['Set', '設定。', 'set'], ['Reset', '重置。', 'reset'], ['Priority', '優先權。', 'priority']],
+                teacher: ['第 5 課是布林形式，第 6 課是 IF 形式。', '強調 Reset 優先。', '適合與 SR Latch 對照。'],
+                practice: ['Start 與 Stop 同時為 TRUE 時，確認輸出為 FALSE。', '放開 Start 後確認保持。', '用 Watch Table 觀察 #RunCmd。'],
+                topics: { left: ['Set / Reset', 'Set 負責開啟，Reset 負責關閉。'], right: ['#RunCmd', 'Latch 的記憶結果。'], set: ['Set', '將狀態設定為 TRUE。'], reset: ['Reset', '將狀態清除為 FALSE。'], priority: ['Priority', 'Reset 寫在 IF 第一層，表示它有最高優先權。'] }
+            },
+            {
+                id: 7,
+                title: '第 7 課：IF / ELSIF / ELSE',
+                subtitle: '條件判斷與優先權。',
+                badge: 'Control Flow',
+                leftTag: 'IF / ELSIF / ELSE',
+                leftDesc: '條件分支。',
+                rightTag: '#RunCmd',
+                rightDesc: '依優先權被設定。',
+                code: 'IF #AutoMode THEN\n    #Speed := 100;\nELSE\n    #Speed := 30;\nEND_IF;',
+                explainTitle: '核心觀念',
+                explainText: 'IF 結構讓優先權更清楚。越前面的條件優先權越高。',
+                mapping: [['IF', '最高優先判斷。'], ['ELSIF', '前面條件不成立時才判斷。']],
+                symbols: [['IF', '條件判斷開始。', 'if'], ['ELSIF', '第二條件分支。', 'elsif'], ['ELSE', '其他狀況。', 'else']],
+                teacher: ['用 IF 呈現 AutoMode 優先。', '說明 ELSIF 不等於兩個獨立 IF。', '提醒 END_IF 必須存在。'],
+                practice: ['將布林寫法改成 IF 寫法。', '觀察 AutoMode 等於ON 或 等於OFF結果。', '刪除 ELSE 後比較行為。'],
+                topics: { left: ['IF 結構', '它負責決定哪一段程式被執行。'], right: ['#RunCmd', '依照條件優先權被設定或保持。'], if: ['IF', '第一個被檢查的條件。'], elsif: ['ELSIF', '只有 IF 不成立時才會被檢查。'], else: ['ELSE', '前面條件都不成立時執行。'] }
+            },
+
+            {
+                id: 8,
+                title: '第 8 課：Timer TON',
+                subtitle: '延時啟動、延時關閉、PT、ET、Q。',
+                badge: 'Timer',
+                leftTag: '#Start → TON',
+                leftDesc: '計時器輸入。',
+                rightTag: '#Timer.Q',
+                rightDesc: '時間到達後輸出。',
+                code: '#Timer(IN := #Start, PT := T#3s);\n"Output" := #Timer.Q;',
+                explainTitle: '核心觀念',
+                explainText: 'TON 是延時啟動計時器。IN 為 TRUE 後開始計時，ET 累積時間，時間到達 PT 後 Q 變 TRUE。',
+                mapping: [['PT', 'Preset Time，設定時間。'], ['ET', 'Elapsed Time，已經累積的時間。']],
+                symbols: [['IN', '計時啟動條件。', 'in'], ['PT', '設定時間。', 'pt'], ['Q', '完成輸出。', 'q']],
+                teacher: ['先教延時啟動。', '再補 ET 監看。', '延時關閉可放在延伸練習。'],
+                practice: ['將 PT 改為 T#5s。', '監看 #Timer.ET。', '觀察 #Timer.Q 何時變 TRUE。'],
+                topics: { left: ['TON 輸入', 'IN 為 TRUE 時計時器開始累積。'], right: ['#Timer.Q', '當 ET 達到 PT 時，Q 變 TRUE。'], in: ['IN', '計時器啟動條件。'], pt: ['PT', '預設時間。'], q: ['Q', '計時完成輸出。'] }
+            },
+            {
+                id: 9,
+                title: '第 9 課：Edge Trigger',
+                subtitle: '掃描週期記憶體方式、R_TRIG、F_TRIG。',
+                badge: 'Edge',
+                leftTag: '#Start',
+                leftDesc: '目前掃描週期狀態。',
+                rightTag: '#Start_Rise',
+                rightDesc: '只成立一個掃描週期。',
+                code: '#Start_Rise := #Start AND NOT #Start_Old;\n#Start_Old := #Start;\n\n#RTrig(CLK := #Start);\n#FTrig(CLK := #SensorNC);',
+                explainTitle: '核心觀念',
+                explainText: 'Edge Trigger 用來抓瞬間變化，避免同一個訊號在多個掃描週期中重複觸發。Factory I/O 的 NC Sensor 特別常用 F_TRIG。',
+                mapping: [['R_TRIG', '偵測 FALSE 到 TRUE。'], ['F_TRIG', '偵測 TRUE 到 FALSE。']],
+                symbols: [['Old', '上一掃描週期記憶。', 'old'], ['R_TRIG', '上升緣。', 'rtrig'], ['F_TRIG', '下降緣。', 'ftrig']],
+                teacher: ['先講掃描週期記憶體方式。', '再講 Siemens R_TRIG / F_TRIG。', '連結 Factory I/O NC Sensor。'],
+                practice: ['用 #Start_Old 觀察上升緣。', '改用 R_TRIG。', '用 F_TRIG 測試 NC Sensor 離開事件。'],
+                topics: { left: ['目前狀態', '這是本掃描週期的訊號。'], right: ['邊緣結果', '只在變化瞬間成立。'], old: ['Old', '保存上一掃描週期狀態。'], rtrig: ['R_TRIG', '偵測 OFF 到 ON。'], ftrig: ['F_TRIG', '偵測 ON 到 OFF。'] }
+            },
+            {
+                id: 10,
+                title: '第 10 課：CASE 狀態機',
+                subtitle: '入門版步進控制。',
+                badge: 'FSM',
+                leftTag: '#Step',
+                leftDesc: '目前狀態。',
+                rightTag: 'CASE',
+                rightDesc: '依狀態執行對應邏輯。',
+                code: 'CASE #Step OF\n    0:\n        IF #Start THEN\n            #Step := 10;\n        END_IF;\n\n    10:\n        "Output" := TRUE;\n        IF #Stop THEN\n            #Step := 0;\n        END_IF;\nEND_CASE;',
+                explainTitle: '核心觀念',
+                explainText: 'CASE 狀態機適合處理步進控制。每個 Step 只負責自己的行為與轉移條件。',
+                mapping: [['State', '系統目前處於哪一個步驟。'], ['Transition', '狀態轉換條件。']],
+                symbols: [['CASE', '依狀態分支。', 'case'], ['Step', '步驟編號。', 'step'], ['END_CASE', '結束狀態機。', 'endcase']],
+                teacher: ['先用兩個狀態講清楚。', '不要一開始就放太多 Step。', '強調狀態可進可出。'],
+                practice: ['建立 Step 0 與 Step 10。', '用 Start 進入 Step 10。', '用 Stop 回到 Step 0。'],
+                topics: { left: ['#Step', '狀態機的目前位置。'], right: ['CASE', '依照 #Step 選擇要執行的段落。'], case: ['CASE', '多分支控制結構。'], step: ['Step', '用數字代表目前流程階段。'], endcase: ['END_CASE', '結束 CASE 結構。'] }
+            },
+            {
+                id: 11,
+                title: '第 11 課：小型整合案例',
+                subtitle: '輸送帶 A 到 B 來回控制或進水/排水互鎖控制。',
+                badge: 'Integration',
+                leftTag: 'Sensor / Start / Stop',
+                leftDesc: '輸入條件。',
+                rightTag: 'Motor / Valve',
+                rightDesc: '輸出控制。',
+                code: 'IF #Stop THEN\n    #RunCmd := FALSE;\nELSIF #Start THEN\n    #RunCmd := TRUE;\nEND_IF;\n\n#Timer(IN := #RunCmd, PT := T#3s);\n"Output" := #RunCmd AND #Timer.Q;',
+                explainTitle: '核心觀念',
+                explainText: '整合案例的目標不是寫很多程式，而是把 I/O、變數、布林、IF、Latch、Timer 串成一個可驗證控制流程。',
+                mapping: [['控制流程', 'Start 建立命令，Timer 形成延時，Output 執行。'], ['驗證方式', '用 Watch Table 觀察每個中間變數。']],
+                symbols: [['Input', '輸入。', 'input'], ['Logic', '邏輯。', 'logic'], ['Output', '輸出。', 'output']],
+                teacher: ['選一個小案例，不要太大。', '要求學生先畫因果流程。', '最後才寫 SCL。'],
+                practice: ['選擇輸送帶或進排水案例。', '列出 DI / DO。', '完成並測試整合程式。'],
+                topics: { left: ['輸入條件', '所有控制都從可觀察條件開始。'], right: ['輸出控制', '輸出必須由單一邏輯結果驅動。'], input: ['Input', '感測器與按鈕。'], logic: ['Logic', '中間變數、Timer、Latch。'], output: ['Output', '馬達、燈號、閥。'] }
+            }
+        ];
+
+        let currentLessonId = 1;
+
+        function renderButtons() {
+            const container = document.getElementById('lessonButtons');
+            container.innerHTML = lessons.map(lesson => `
+                <button class="lesson-btn" data-lesson="${lesson.id}">
+                    <strong>${lesson.title}</strong>
+                    <span>${lesson.subtitle}</span>
+                </button>
+            `).join('');
+
+            container.querySelectorAll('.lesson-btn').forEach(button => {
+                button.addEventListener('click', () => renderLesson(Number(button.dataset.lesson)));
+            });
+        }
+
+        function renderLesson(id) {
+            currentLessonId = id;
+            const lesson = lessons.find(item => item.id === id);
+            if (!lesson) return;
+            document.getElementById('lessonTitle').textContent = lesson.title;
+            document.getElementById('lessonSubtitle').textContent = lesson.subtitle;
+            document.getElementById('lessonBadge').textContent = lesson.badge;
+            document.getElementById('leftNodeTag').textContent = lesson.leftTag;
+            document.getElementById('leftNodeDesc').textContent = lesson.leftDesc;
+            document.getElementById('rightNodeTag').textContent = lesson.rightTag;
+            document.getElementById('rightNodeDesc').textContent = lesson.rightDesc;
+            document.getElementById('codeBlock').textContent = lesson.code;
+            document.getElementById('explainTitle').textContent = lesson.explainTitle;
+            document.getElementById('explainText').textContent = lesson.explainText;
+            document.getElementById('mappingArea').innerHTML = lesson.mapping.map(item => `<div class="mapping-card"><h3>${item[0]}</h3><p>${item[1]}</p></div>`).join('');
+            document.getElementById('symbolGrid').innerHTML = lesson.symbols.map(item => `<div class="symbol-card" data-topic="${item[2]}"><strong>${item[0]}</strong><span>${item[1]}</span></div>`).join('');
+            document.getElementById('teacherNotes').innerHTML = lesson.teacher.map(text => `<li>${text}</li>`).join('');
+            document.getElementById('practiceNotes').innerHTML = lesson.practice.map(text => `<li>${text}</li>`).join('');
+            document.querySelectorAll('.lesson-btn').forEach(button => button.classList.toggle('active', Number(button.dataset.lesson) === id));
+            document.querySelectorAll('.node, .symbol-card').forEach(element => element.classList.remove('active'));
+        }
+
+        document.addEventListener('click', event => {
+            const clickable = event.target.closest('[data-topic]');
+            if (!clickable) return;
+            const lesson = lessons.find(item => item.id === currentLessonId);
+            if (!lesson) return;
+            const topic = clickable.dataset.topic;
+            if (!lesson.topics[topic]) return;
+            const detail = lesson.topics[topic];
+            document.getElementById('explainTitle').textContent = detail[0];
+            document.getElementById('explainText').textContent = detail[1];
+            document.querySelectorAll('.node, .symbol-card').forEach(element => element.classList.remove('active'));
+            clickable.classList.add('active');
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const text = document.getElementById('codeBlock').textContent;
+            try {
+                await navigator.clipboard.writeText(text);
+                const button = document.getElementById('copyBtn');
+                const oldText = button.textContent;
+                button.textContent = '已複製';
+                setTimeout(() => {
+                    button.textContent = oldText;
+                }, 1000);
+            } catch (error) {
+                alert('瀏覽器不允許直接複製，請手動選取代碼。');
+            }
+        });
+
+        renderButtons();
+        renderLesson(1);
+    </script>
+</body>
+</html>

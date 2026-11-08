@@ -1,0 +1,55 @@
+{
+  "site": "AI × PLC 工業自動化互動學習平台",
+  "recommended_repository": "ai-plc-learning-hub",
+  "files": [
+    {
+      "original": "000_AI 發展脈絡與學派.html",
+      "new": "ai-history-schools.html",
+      "title": "AI 發展脈絡與學派",
+      "category": "AI 基礎"
+    },
+    {
+      "original": "100_AI × 工業4.0 × PLC × SCL.html",
+      "new": "ai-industry40-plc-scl.html",
+      "title": "AI × 工業 4.0 × PLC × SCL",
+      "category": "AI 與工業"
+    },
+    {
+      "original": "200_factoryio_reverse_learning_animation.html",
+      "new": "factoryio-reverse-learning.html",
+      "title": "Factory I/O 反向學習",
+      "category": "工程思維"
+    },
+    {
+      "original": "300_PLC 系統與神經網路_未來工程學.html",
+      "new": "plc-neural-networks.html",
+      "title": "PLC 系統與神經網路",
+      "category": "AI 與工業"
+    },
+    {
+      "original": "400_Markdown說明_Prompt框架_v3.0.html",
+      "new": "plc-ai-prompt-framework.html",
+      "title": "PLC × AI Prompt 工程框架",
+      "category": "Prompt 工程"
+    },
+    {
+      "original": "500_SCL 入門互動課程.html",
+      "new": "scl-interactive-course.html",
+      "title": "SCL 入門互動課程",
+      "category": "PLC 程式"
+    },
+    {
+      "original": "卡諾圖_01_K-Map 教學地圖.html",
+      "new": "kmap-learning-map.html",
+      "title": "K-map 互動教學地圖",
+      "category": "數位邏輯"
+    },
+    {
+      "original": "卡諾圖_02_K-map 消除技巧專章.html",
+      "new": "kmap-simplification.html",
+      "title": "K-map 消除技巧專章",
+      "category": "數位邏輯"
+    }
+  ],
+  "issues": []
+}

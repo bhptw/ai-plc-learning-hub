@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4 變數以上 K-map 簡化消除技巧</title>
+    <style>
+        :root {
+            --bg: #07111f;
+            --panel: #0f172a;
+            --panel2: #111827;
+            --card: #1e293b;
+            --line: #334155;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --green: #22c55e;
+            --amber: #f59e0b;
+            --purple: #a78bfa;
+            --red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+            background: radial-gradient(circle at top left, #123a63 0, var(--bg) 36%, #020617 100%);
+            color: var(--text);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+
+        aside {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 22px 16px;
+            background: rgba(2, 6, 23, 0.86);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        main {
+            padding: 24px;
+        }
+
+        .brand, .panel, .mini-card {
+            background: rgba(15, 23, 42, 0.84);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 22px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+        }
+
+        .brand {
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .brand h1 {
+            margin: 0 0 10px 0;
+            font-size: 22px;
+            line-height: 1.35;
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .step-btn, .control-btn {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(255, 255, 255, 0.045);
+            color: var(--text);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .step-btn {
+            padding: 12px;
+            text-align: left;
+            line-height: 1.45;
+        }
+
+        .step-btn span {
+            display: block;
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .step-btn:hover, .control-btn:hover {
+            border-color: rgba(56, 189, 248, 0.55);
+            background: rgba(56, 189, 248, 0.09);
+        }
+
+        .step-btn.active {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.16);
+        }
+
+        .control-btn {
+            padding: 10px 12px;
+            font-size: 14px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .panel {
+            padding: 20px;
+        }
+
+        .hero h2 {
+            margin: 0 0 12px 0;
+            font-size: 30px;
+        }
+
+        .hero p, .panel p, .panel li {
+            color: var(--muted);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .tag {
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #bae6fd;
+            background: rgba(56, 189, 248, 0.08);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 470px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .lesson-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .lesson-head h3 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .pill {
+            white-space: nowrap;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #bbf7d0;
+            background: rgba(34, 197, 94, 0.08);
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 12px;
+        }
+
+        .section {
+            padding: 16px;
+            margin: 14px 0;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .section h4 {
+            margin: 0 0 10px 0;
+            color: #e0f2fe;
+            font-size: 16px;
+        }
+
+        .code {
+            font-family: Consolas, Monaco, monospace;
+            background: #020617;
+            color: #d1fae5;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            padding: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        .lab {
+            position: sticky;
+            top: 18px;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 16px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 6px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            text-align: center;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(2, 6, 23, 0.55);
+            padding: 9px 6px;
+            color: var(--text);
+        }
+
+        th {
+            color: #cbd5e1;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .cell {
+            position: relative;
+            height: 66px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            font-weight: 700;
+        }
+
+        .cell:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .cell.one {
+            background: rgba(34, 197, 94, 0.18);
+            border-color: rgba(34, 197, 94, 0.55);
+            color: #bbf7d0;
+        }
+
+        .cell.selected {
+            outline: 3px solid rgba(56, 189, 248, 0.95);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.28);
+        }
+
+        .cell.group-ab {
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.95) inset;
+        }
+
+        .cell.group-cd {
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.95) inset;
+        }
+
+        .cell.group-bd {
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.95) inset;
+        }
+
+        .cell.group-wrap {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.95) inset;
+        }
+
+        .cell.group-eight {
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.95) inset;
+        }
+
+        .key {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 400;
+        }
+
+        .result-card {
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(2, 6, 23, 0.72);
+            border: 1px solid rgba(56, 189, 248, 0.22);
+        }
+
+        .result-card strong {
+            color: #bae6fd;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .mini-card {
+            padding: 13px;
+        }
+
+        .mini-card h5 {
+            margin: 0 0 6px 0;
+            color: #e0f2fe;
+            font-size: 14px;
+        }
+
+        .mini-card p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .keep {
+            border-color: rgba(34, 197, 94, 0.4);
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .remove {
+            border-color: rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .answer {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.28);
+            color: #bbf7d0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1150px) {
+            .layout, .hero, .grid {
+                grid-template-columns: 1fr;
+            }
+
+            aside, .lab {
+                position: relative;
+                height: auto;
+                top: auto;
+            }
+        }
+
+        @media (max-width: 720px) {
+            main {
+                padding: 14px;
+            }
+            .compare-grid, .exercise-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside>
+            <div class="brand">
+                <h1>K-map 消除技巧專章</h1>
+                <p>專門處理 4 變數以上 K-map 的核心問題：如何判斷哪些變數留下，哪些變數消掉。</p>
+            </div>
+            <div class="step-list" id="stepList"></div>
+        </aside>
+
+        <main>
+            <section class="hero">
+                <div class="panel">
+                    <h2>核心觀念：不是圈格子，是找不變量</h2>
+                    <p>K-map 簡化的真正規則只有一句：群組內「保持不變的變數留下」，「會變化的變數消掉」。4 變數以上容易混亂，是因為格子變多、群組可能跨邊界、同一個 1 可以重複被圈。這份教學把消除流程拆成可操作步驟。</p>
+                    <div class="tag-row">
+                        <span class="tag">4-variable K-map</span>
+                        <span class="tag">Gray Code</span>
+                        <span class="tag">Variable Elimination</span>
+                        <span class="tag">Group Size</span>
+                        <span class="tag">PLC SCL</span>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>本專章範例</h2>
+                    <p>主要以 4 變數 A、B、C、D 示範。K-map 列使用 AB，欄使用 CD，兩者都採用 Gray Code：00, 01, 11, 10。</p>
+                    <div class="code">範例一：OUT = AB + CD
+範例二：跨邊界群組，示範 K-map 左右相鄰
+範例三：8 格群組，示範只保留 1 個變數</div>
+                </div>
+            </section>
+
+            <section class="grid">
+                <div class="panel">
+                    <div class="lesson-head">
+                        <h3 id="lessonTitle">Step 1</h3>
+                        <span class="pill" id="lessonBadge">消除流程</span>
+                    </div>
+                    <div id="lessonContent"></div>
+                </div>
+
+                <div class="panel lab">
+                    <div class="lesson-head">
+                        <h3>互動 K-map Lab</h3>
+                        <span class="pill">AB / CD</span>
+                    </div>
+                    <div class="control-row">
+                        <button class="control-btn" onclick="loadCase('ab_cd')">範例：AB + CD</button>
+                        <button class="control-btn" onclick="loadCase('wrap')">跨邊界群組</button>
+                        <button class="control-btn" onclick="loadCase('eight')">8 格群組</button>
+                        <button class="control-btn" onclick="nextFlowStep()">下一步消除</button>
+                        <button class="control-btn" onclick="resetFlow()">重置</button>
+                    </div>
+                    <table id="kmap"></table>
+                    <div class="result-card" id="labExplain">
+                        <strong>操作提示：</strong><br />先選一個範例，再按「下一步消除」。系統會依序示範：圈選群組、列出格子、比較 A/B/C/D、刪除變數、得到化簡項。
+                    </div>
+                    <div class="compare-grid" id="varCompare"></div>
+                </div>
+            </section>
+
+            <section class="panel" style="margin-top:18px;">
+                <div class="lesson-head">
+                    <h3>練習題</h3>
+                    <span class="pill">檢查是否真的懂消除</span>
+                </div>
+                <div class="exercise-grid">
+                    <div class="mini-card">
+                        <h5>練習 1：4 格群組</h5>
+                        <p>群組格子：0101、0111、1101、1111。請判斷留下哪些變數。</p>
+                        <button class="control-btn" onclick="toggleAnswer('ans1')">顯示答案</button>
+                        <div class="answer" id="ans1">B 全部為 1，D 全部為 1；A、C 會變化。結果：BD。</div>
+                    </div>
+                    <div class="mini-card">
+                        <h5>練習 2：整列群組</h5>
+                        <p>AB=10 的整列 4 格全部為 1。請判斷化簡結果。</p>
+                        <button class="control-btn" onclick="toggleAnswer('ans2')">顯示答案</button>
+                        <div class="answer" id="ans2">A=1 固定，B=0 固定；C、D 變化。結果：AB'。</div>
+                    </div>
+                    <div class="mini-card">
+                        <h5>練習 3：整欄群組</h5>
+                        <p>CD=01 的整欄 4 格全部為 1。請判斷化簡結果。</p>
+                        <button class="control-btn" onclick="toggleAnswer('ans3')">顯示答案</button>
+                        <div class="answer" id="ans3">C=0 固定，D=1 固定；A、B 變化。結果：C'D。</div>
+                    </div>
+                    <div class="mini-card">
+                        <h5>練習 4：8 格群組</h5>
+                        <p>所有 B=1 的 8 格都是 1。請判斷化簡結果。</p>
+                        <button class="control-btn" onclick="toggleAnswer('ans4')">顯示答案</button>
+                        <div class="answer" id="ans4">只有 B 不變，A、C、D 都變化。結果：B。</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const rows = ["00", "01", "11", "10"];
+        const cols = ["00", "01", "11", "10"];
+        const variables = ["A", "B", "C", "D"];
+
+        const steps = [
+            {
+                title: "Step 1：先認識群組大小",
+                badge: "1, 2, 4, 8, 16",
+                html: `
+                    <div class="section"><h4>教學重點</h4><p>K-map 的群組大小必須是 2 的次方：1、2、4、8、16。群組越大，消掉的變數越多，公式越簡單。</p></div>
+                    <div class="section"><h4>消除數量</h4><div class="code">1 格：消掉 0 個變數，留下 4 個變數
+2 格：消掉 1 個變數，留下 3 個變數
+4 格：消掉 2 個變數，留下 2 個變數
+8 格：消掉 3 個變數，留下 1 個變數
+16 格：消掉 4 個變數，結果為 1</div></div>
+                    <div class="section"><h4>一句話</h4><p>不是看到 1 就急著圈，而是先找能不能圈更大的群組。K-map 的世界裡，大圈通常比小圈有價值，這跟工程專案的會議剛好相反。</p></div>
+                `
+            },
+            {
+                title: "Step 2：列出群組內所有格子",
+                badge: "List cells",
+                html: `
+                    <div class="section"><h4>教學重點</h4><p>不要直接猜答案。先把被圈到的格子完整列出，例如 1100、1101、1111、1110。這一步可以防止學生看圖看錯。</p></div>
+                    <div class="section"><h4>格式</h4><div class="code">格子 = ABCD
+例如：1101 表示 A=1, B=1, C=0, D=1</div></div>
+                    <div class="section"><h4>操作</h4><p>右側選「AB + CD」後按下一步消除，會先示範 AB 群組有哪些格子。</p></div>
+                `
+            },
+            {
+                title: "Step 3：逐一比較 A、B、C、D",
+                badge: "Compare variables",
+                html: `
+                    <div class="section"><h4>教學重點</h4><p>把群組內每一格的 A、B、C、D 分別拿出來比較。全部一樣才留下；只要有 0 也有 1，就代表該變數在群組內變化，必須消掉。</p></div>
+                    <div class="section"><h4>判斷規則</h4><div class="code">全部為 1：留下原變數，例如 A
+全部為 0：留下反變數，例如 A'
+有 0 也有 1：消掉該變數</div></div>
+                `
+            },
+            {
+                title: "Step 4：留下不變量",
+                badge: "Keep constants",
+                html: `
+                    <div class="section"><h4>教學重點</h4><p>K-map 的化簡式，就是群組內不變的變數相乘。4 格群組會留下 2 個變數，8 格群組會留下 1 個變數。</p></div>
+                    <div class="section"><h4>範例</h4><div class="code">群組：1100, 1101, 1111, 1110
+A：全部 1 -> 留下 A
+B：全部 1 -> 留下 B
+C：0,0,1,1 -> 消掉
+D：0,1,1,0 -> 消掉
+結果：AB</div></div>
+                `
+            },
+            {
+                title: "Step 5：跨邊界也算相鄰",
+                badge: "Wrap-around",
+                html: `
+                    <div class="section"><h4>教學重點</h4><p>K-map 的左邊與右邊相鄰，上邊與下邊也相鄰。這是初學者最常漏掉的簡化機會。</p></div>
+                    <div class="section"><h4>為什麼可以跨邊界？</h4><p>因為 Gray Code 排列下，最左欄 00 和最右欄 10 只差一個 bit，所以它們仍然是相鄰格。</p></div>
+                    <div class="section"><h4>操作</h4><p>右側選「跨邊界群組」，觀察左右兩欄如何形成 4 格群組。</p></div>
+                `
+            },
+            {
+                title: "Step 6：重疊群組是允許的",
+                badge: "Overlap allowed",
+                html: `
+                    <div class="section"><h4>教學重點</h4><p>同一個 1 可以被多個群組使用。目標不是每個 1 只能用一次，而是用最少、最大的群組覆蓋所有需要的 1。</p></div>
+                    <div class="section"><h4>判斷策略</h4><ul><li>先找最大群組。</li><li>再補還沒被覆蓋的 1。</li><li>可以重疊，但不要圈出沒有貢獻的多餘群組。</li></ul></div>
+                `
+            }
+        ];
+
+        const cases = {
+            ab_cd: {
+                name: "AB + CD",
+                ones: ["1100", "1101", "1111", "1110", "0011", "0111", "1011"],
+                flows: [
+                    {
+                        title: "AB 群組：整列 AB=11",
+                        group: "ab",
+                        cells: ["1100", "1101", "1111", "1110"],
+                        result: "AB",
+                        text: "AB=11 的整列都是 1。C、D 在群組內變化，因此被消掉；A、B 固定為 1，所以留下 AB。"
+                    },
+                    {
+                        title: "CD 群組：整欄 CD=11",
+                        group: "cd",
+                        cells: ["0011", "0111", "1111", "1011"],
+                        result: "CD",
+                        text: "CD=11 的整欄都是 1。A、B 在群組內變化，因此被消掉；C、D 固定為 1，所以留下 CD。"
+                    },
+                    {
+                        title: "合併結果",
+                        group: null,
+                        cells: [],
+                        result: "OUT = AB + CD",
+                        text: "兩個群組各自得到一個乘積項，最後用 OR 相加。SCL：#OUT := (#A AND #B) OR (#C AND #D);"
+                    }
+                ]
+            },
+            wrap: {
+                name: "跨邊界群組",
+                ones: ["0000", "0001", "0010", "1000", "1001", "1010"],
+                flows: [
+                    {
+                        title: "跨左右邊界群組",
+                        group: "wrap",
+                        cells: ["0000", "0001", "1000", "1001"],
+                        result: "B'C'",
+                        text: "左欄 CD=00 與右欄 CD=10 相鄰，因為 00 與 10 只差 C。群組中 B=0、C=0 固定，A 與 D 變化，所以留下 B'C'。"
+                    },
+                    {
+                        title: "另一次跨邊界觀察",
+                        group: "wrap",
+                        cells: ["0000", "0010", "1000", "1010"],
+                        result: "B'D'",
+                        text: "這組同樣利用左右邊界相鄰。B=0、D=0 固定，A 與 C 變化，所以留下 B'D'。"
+                    }
+                ]
+            },
+            eight: {
+                name: "8 格群組",
+                ones: ["0100", "0101", "0111", "0110", "1100", "1101", "1111", "1110"],
+                flows: [
+                    {
+                        title: "8 格群組：所有 B=1",
+                        group: "eight",
+                        cells: ["0100", "0101", "0111", "0110", "1100", "1101", "1111", "1110"],
+                        result: "B",
+                        text: "這 8 格中，只有 B 永遠等於 1。A、C、D 都會變化，所以全部消掉，只留下 B。"
+                    }
+                ]
+            }
+        };
+
+        let currentStep = 0;
+        let currentCase = "ab_cd";
+        let flowIndex = -1;
+
+        function init() {
+            renderStepList();
+            renderStep();
+            renderKmap();
+        }
+
+        function renderStepList() {
+            const list = document.getElementById("stepList");
+            list.innerHTML = steps.map((s, i) => `
+                <button class="step-btn ${i === currentStep ? "active" : ""}" onclick="goStep(${i})">
+                    ${s.title}
+                    <span>${s.badge}</span>
+                </button>
+            `).join("");
+        }
+
+        function renderStep() {
+            document.getElementById("lessonTitle").innerText = steps[currentStep].title;
+            document.getElementById("lessonBadge").innerText = steps[currentStep].badge;
+            document.getElementById("lessonContent").innerHTML = steps[currentStep].html;
+            renderStepList();
+        }
+
+        function goStep(i) {
+            currentStep = i;
+            renderStep();
+        }
+
+        function getOut(key) {
+            return cases[currentCase].ones.includes(key) ? 1 : 0;
+        }
+
+        function renderKmap(activeCells = [], groupClass = "") {
+            const table = document.getElementById("kmap");
+            table.innerHTML = `<tr><th>AB / CD</th>${cols.map(cd => `<th>CD=${cd}</th>`).join("")}</tr>` + rows.map(ab => {
+                return `<tr><th>AB=${ab}</th>${cols.map(cd => {
+                    const key = ab + cd;
+                    const out = getOut(key);
+                    const selected = activeCells.includes(key) ? `selected ${groupClass}` : "";
+                    return `<td class="cell ${out ? "one" : ""} ${selected}" onclick="inspectCell('${key}')">${out}<span class="key">${key}</span></td>`;
+                }).join("")}</tr>`;
+            }).join("");
+        }
+
+        function inspectCell(key) {
+            const bits = key.split("");
+            const text = variables.map((v, i) => `${v}=${bits[i]}`).join(", ");
+            document.getElementById("labExplain").innerHTML = `<strong>目前格子：</strong><br />${key}<br />${text}<br />OUT=${getOut(key)}。若 OUT=1，這格可以參與 SOP 群組；若 OUT=0，不能被圈入一般 1 的群組。`;
+            renderKmap([key], "");
+            renderCompare([]);
+        }
+
+        function loadCase(name) {
+            currentCase = name;
+            flowIndex = -1;
+            renderKmap();
+            renderCompare([]);
+            document.getElementById("labExplain").innerHTML = `<strong>已載入：</strong><br />${cases[currentCase].name}<br />請按「下一步消除」觀看完整流程。`;
+        }
+
+        function nextFlowStep() {
+            const c = cases[currentCase];
+            flowIndex = (flowIndex + 1) % c.flows.length;
+            const f = c.flows[flowIndex];
+            const className = f.group ? `group-${f.group}` : "";
+            renderKmap(f.cells, className);
+            renderCompare(f.cells);
+            document.getElementById("labExplain").innerHTML = `<strong>${f.title}</strong><br /><br />${f.text}<br /><br /><strong>化簡項：</strong> ${f.result}`;
+        }
+
+        function resetFlow() {
+            flowIndex = -1;
+            renderKmap();
+            renderCompare([]);
+            document.getElementById("labExplain").innerHTML = `<strong>操作提示：</strong><br />先選一個範例，再按「下一步消除」。系統會依序示範：圈選群組、列出格子、比較 A/B/C/D、刪除變數、得到化簡項。`;
+        }
+
+        function renderCompare(cells) {
+            const box = document.getElementById("varCompare");
+            if (!cells || cells.length === 0) {
+                box.innerHTML = "";
+                return;
+            }
+
+            box.innerHTML = variables.map((v, i) => {
+                const values = cells.map(key => key[i]);
+                const unique = [...new Set(values)];
+                const isKeep = unique.length === 1;
+                let result;
+                if (isKeep) {
+                    result = unique[0] === "1" ? `保留 ${v}` : `保留 ${v}'`;
+                } else {
+                    result = `消掉 ${v}`;
+                }
+                return `<div class="mini-card ${isKeep ? "keep" : "remove"}">
+                    <h5>${v} 欄比較</h5>
+                    <p>值：${values.join(", ")}<br />判斷：${result}</p>
+                </div>`;
+            }).join("");
+        }
+
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === "block" ? "none" : "block";
+        }
+
+        init();
+    </script>
+</body>
+</html>

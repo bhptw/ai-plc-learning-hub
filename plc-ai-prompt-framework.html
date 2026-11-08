@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PLC × AI 教學標準模組</title>
+<style>
+:root{
+--bg0:#050814;
+--bg1:#07111f;
+--bg2:#0b1730;
+--panel:#0f1b33;
+--panel2:#111f3d;
+--card:#0f1f3a;
+--card2:#12284a;
+--line:#223a66;
+--line2:#2f5f9f;
+--text:#e6f1ff;
+--muted:#9fb5d1;
+--cyan:#28d7ff;
+--blue:#3b82f6;
+--violet:#8b5cf6;
+--green:#22c55e;
+--amber:#f59e0b;
+--shadow:0 18px 50px rgba(0,0,0,.35);
+--glow:0 0 22px rgba(40,215,255,.28);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Microsoft JhengHei",Arial,sans-serif;background:radial-gradient(circle at 20% 0%,rgba(40,215,255,.18),transparent 32%),radial-gradient(circle at 85% 10%,rgba(139,92,246,.16),transparent 34%),linear-gradient(135deg,var(--bg0),var(--bg1) 52%,#030712);color:var(--text)}
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(180deg,rgba(8,18,36,.96),rgba(5,8,20,.98));color:var(--text);padding:22px;overflow:auto;border-right:1px solid rgba(40,215,255,.22);box-shadow:8px 0 34px rgba(0,0,0,.28)}
+.sidebar-title{font-size:21px;font-weight:900;margin:0 0 14px;letter-spacing:.5px;background:linear-gradient(90deg,var(--cyan),#dbeafe);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sidebar-note{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 20px}
+.item{padding:13px 14px;margin-bottom:10px;border-radius:12px;background:rgba(15,31,58,.72);cursor:pointer;line-height:1.45;border:1px solid rgba(59,130,246,.22);color:#dcecff;transition:.2s;backdrop-filter:blur(10px)}
+.item:hover{border-color:rgba(40,215,255,.65);transform:translateX(2px);box-shadow:var(--glow)}
+.item.active{background:linear-gradient(135deg,rgba(37,99,235,.9),rgba(40,215,255,.22));border-color:var(--cyan);box-shadow:var(--glow)}
+.main{padding:26px;overflow:auto}
+.card{background:linear-gradient(180deg,rgba(15,31,58,.94),rgba(10,22,43,.94));border:1px solid rgba(64,131,190,.32);border-radius:18px;padding:22px;margin-bottom:22px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.card h2,.card h3{margin-top:0;color:#f8fbff;letter-spacing:.2px}
+.card h3{border-left:4px solid var(--cyan);padding-left:12px}
+.card p,.card li{line-height:1.8;color:#d4e5fb}
+.prompt{background:linear-gradient(180deg,#050b1d,#071426);color:#e8f5ff;padding:18px;border-radius:14px;white-space:pre-wrap;font-family:Consolas,"Microsoft JhengHei",monospace;line-height:1.7;overflow:auto;border:1px solid rgba(40,215,255,.25);box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 0 28px rgba(40,215,255,.12)}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 14px;background:rgba(15,31,58,.82);border-radius:999px;cursor:pointer;border:1px solid rgba(59,130,246,.28);font-size:14px;color:#cfe6ff;transition:.2s}
+.tab:hover{border-color:var(--cyan);box-shadow:var(--glow)}
+.tab.active{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#04111f;border-color:transparent;font-weight:800}
+.table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid rgba(64,131,190,.32)}
+.table th,.table td{border-bottom:1px solid rgba(64,131,190,.24);padding:12px;text-align:left;vertical-align:top;line-height:1.65;color:#dcecff}
+.table th{background:linear-gradient(135deg,#11254a,#0b4d79);color:#eaffff;font-weight:800}
+.table tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.table tr:last-child td{border-bottom:0}
+.badge{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(40,215,255,.13);color:#7ddfff;border:1px solid rgba(40,215,255,.38);font-weight:800;font-size:13px;margin-bottom:10px;box-shadow:0 0 18px rgba(40,215,255,.16)}
+.framework-card{background:linear-gradient(180deg,rgba(18,40,74,.9),rgba(12,26,52,.9));border:1px solid rgba(40,215,255,.25);border-radius:14px;padding:18px;margin-bottom:18px}
+.framework-shell{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 52px);background:rgba(4,10,24,.52);border:1px solid rgba(40,215,255,.22);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.framework-side{background:linear-gradient(180deg,#071426,#050814);color:var(--text);padding:22px;border-right:1px solid rgba(40,215,255,.22)}
+.framework-side h2{font-size:22px;margin:0 0 12px;color:#f8fbff}
+.framework-side p{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 22px}
+.framework-nav{display:block;width:100%;padding:14px 12px;margin-bottom:12px;border-radius:14px;background:rgba(15,31,58,.86);color:#dcecff;border:1px solid rgba(59,130,246,.26);cursor:pointer;text-align:left;font-weight:800;line-height:1.45;transition:.2s}
+.framework-nav:hover{border-color:var(--cyan);box-shadow:var(--glow)}
+.framework-nav.active{background:linear-gradient(135deg,rgba(37,99,235,.9),rgba(40,215,255,.25));border-color:var(--cyan);color:#fff;box-shadow:var(--glow)}
+.framework-main{padding:24px;overflow:auto;background:radial-gradient(circle at 100% 0%,rgba(40,215,255,.08),transparent 35%)}
+.hero{background:linear-gradient(135deg,rgba(15,31,58,.96),rgba(8,39,69,.88));border:1px solid rgba(40,215,255,.27);border-radius:22px;padding:26px;margin-bottom:22px;box-shadow:var(--shadow)}
+.hero h2{font-size:30px;margin:8px 0 10px;color:#f8fbff}
+.hero p{font-size:17px;color:#bcd2ee;margin:0;line-height:1.7}
+.content-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
+.structure-list{display:grid;gap:12px}
+.structure-item{padding:13px 15px;border-radius:14px;background:rgba(18,40,74,.72);border:1px solid rgba(64,131,190,.27);line-height:1.65;color:#dcecff}
+.scenario{padding:15px;border-radius:16px;background:rgba(12,46,78,.62);border:1px solid rgba(40,215,255,.24);margin-bottom:12px;color:#dcecff}
+.scenario-title{font-weight:900;color:#7ddfff;margin-bottom:6px}
+.footer-controls{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(15,31,58,.94),rgba(10,22,43,.94));border:1px solid rgba(40,215,255,.22);border-radius:18px;padding:16px 20px;margin-top:22px;box-shadow:var(--shadow);color:#dcecff}
+.control-btn{border:0;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#04111f;padding:11px 18px;border-radius:12px;cursor:pointer;font-weight:800;box-shadow:0 0 20px rgba(40,215,255,.18)}
+.control-btn:hover{filter:brightness(1.08)}
+hr{border:0;border-top:1px solid rgba(64,131,190,.3);margin:20px 0}
+@media(max-width:980px){.layout,.framework-shell{grid-template-columns:1fr}.grid,.grid2,.content-grid{grid-template-columns:1fr}.main{padding:18px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+<div class="sidebar-title">PLC × AI 教學模組</div>
+<p class="sidebar-note">以工程流程教學生從自然語言、Markdown 到 SCL，不把 AI 當黑盒子。</p>
+<div id="menu"></div>
+</aside>
+<main class="main" id="main"></main>
+</div>
+<script>
+'use strict';
+
+let page = 0;
+let subView = 'fail';
+let mdView = 'heading';
+let errTab = 0;
+let mdSection = 'overview';
+let flowSection = 'overview';
+let frameworkIndex = 0;
+
+const errorTabs = [
+    {
+        title: 'Python',
+        code: 'while True:\n    if sensor_a:\n        conveyor_cw = True\n        conveyor_ccw = False\n    if sensor_b:\n        conveyor_cw = False\n        conveyor_ccw = True',
+        issues: ['Python 是一般程式語言，不是 PLC 掃描週期邏輯。','沒有 FUNCTION_BLOCK、VAR_INPUT、VAR_OUTPUT 結構。','沒有處理 NC / NO 語意。','沒有 Stop 優先與正反轉互鎖。']
+    },
+    {
+        title: 'C++',
+        code: 'if (SensorA == true) {\n    ConveyorCW = true;\n    ConveyorCCW = false;\n}\nif (SensorB == true) {\n    ConveyorCW = false;\n    ConveyorCCW = true;\n}',
+        issues: ['C++ 語法不是 Siemens TIA Portal SCL。','缺少 PLC 掃描週期、保持、復歸與優先權模型。','兩段 if 可能在同一掃描週期互相覆寫輸出。','變數命名與 PLC Tag 無法直接對應。']
+    },
+    {
+        title: 'ST / 類 IEC',
+        code: 'IF Sensor_A THEN\n    Conveyor_CW := TRUE;\n    Conveyor_CCW := FALSE;\nEND_IF;\n\nIF Sensor_B THEN\n    Conveyor_CW := FALSE;\n    Conveyor_CCW := TRUE;\nEND_IF;',
+        issues: ['看起來像 ST，但不一定符合 Siemens TIA SCL 專案結構。','沒有 FUNCTION_BLOCK 外框與變數宣告區。','Sensor_A 若為 NC，程式內應使用 NOT 反相處理。','缺少自保持與 Stop 優先。']
+    },
+    {
+        title: 'ST 混入 Python',
+        code: 'IF Sensor_A:\n    Conveyor_CW = True\n    Conveyor_CCW = False\nELSE:\n    Conveyor_CW = False\nEND_IF;',
+        issues: ['使用 Python 冒號與縮排，不符合 ST 語法。','賦值使用 = 而非 :=。','布林值應使用 TRUE / FALSE。','IF / ELSE / END_IF 結構混用，無法在 TIA Portal 編譯。']
+    }
+];
+
+const mdExamples = {
+    heading: {
+        title: '# 標題：語意分層',
+        description: '用標題切分階段，避免 AI 把觀察、分析、建模與程式生成混在一起。',
+        prompt: '# Stage 1：語意鎖定（禁止推論）\n列出所有 DI / DO、NC / NO 定義\n\n# Stage 2：行為描述（禁止寫程式）\n將自然語言轉換為可觀測行為\n\n# Stage 3：FSM 建模\n定義狀態、事件、動作與下一狀態'
+    },
+    list: {
+        title: '- 清單：約束枚舉',
+        description: '用清單列出條件、限制、Tag 與驗收規則，避免 AI 遺漏工程條件。',
+        prompt: '# 輸入\n- Sensor_A：NC（TRUE=無物件）\n- Sensor_B：NC（TRUE=無物件）\n- Stop：NC（TRUE=正常）\n\n# 約束\n- Stop 必須最高優先\n- 不可同時正反轉\n- 每一個 DO 只能有一個邏輯來源'
+    },
+    code: {
+        title: '```code```：輸出鎖定',
+        description: '用 code block 鎖定輸出型態，避免 AI 輸出解釋而不是程式碼。',
+        prompt: '請輸出以下格式：\n```scl\nFUNCTION_BLOCK FB_Conveyor\nVAR\n    RunCmd : BOOL;\nEND_VAR\nBEGIN\nEND_FUNCTION_BLOCK\n```'
+    },
+    flow: {
+        title: '固定格式：流程鎖定',
+        description: '固定輸出順序，讓 AI 依照工程流程回答，方便教學、Debug 與驗證。',
+        prompt: '# 請固定輸出\n1. Tag 語意表\n2. 控制邏輯說明\n3. FSM 狀態表\n4. SCL 程式碼\n5. Watch Table 驗證方式'
+    },
+    full: {
+        title: '固定格式（完整工程案例）',
+        description: '這是可直接拿去上課的完整 Prompt 範本，目標是把模糊需求轉成可驗證的工程規格。',
+        prompt: '# 角色\n你是一位 Siemens TIA Portal SCL 工程師，熟悉 Factory IO 與 PLC 教學。\n\n# 任務\n請根據以下條件設計輸送帶來回控制的 SCL FUNCTION_BLOCK。\n\n# 輸入\n- Sensor_A：NC（TRUE=無物件，FALSE=有物件）\n- Sensor_B：NC（TRUE=無物件，FALSE=有物件）\n- Start：NO\n- Stop：NC（TRUE=正常，FALSE=按下）\n\n# 輸出\n- Conveyor_CW\n- Conveyor_CCW\n\n# 行為需求\n1. 物件碰到 Sensor_A 時，啟動正轉並自保持。\n2. 物件碰到 Sensor_B 時，停止正轉並啟動反轉。\n3. 物件回到 Sensor_A 時，停止反轉。\n\n# 約束\n- Stop 必須最高優先。\n- 不可同時正轉與反轉。\n- NC 訊號在程式中必須使用 NOT 反相處理。\n- 不可使用未定義變數。\n\n# 輸出格式\n1. Tag 語意表\n2. 控制邏輯說明\n3. SCL FUNCTION_BLOCK\n4. Watch Table 驗證方式'
+    }
+};
+
+const frameworkData = [
+    {
+        badge: '規格導向',
+        title: '框架 A：角色 / 任務 / 輸入 / 輸出 / 約束條件',
+        tagline: '適合拿來寫 PLC 程式、技術規格、招標規範、SCL 生成等需要邊界清楚的任務。',
+        structure: [
+            ['角色', '指定 AI 要扮演誰，例如 Siemens SCL 工程師、PLC 講師、招標規範撰寫顧問。'],
+            ['任務', '清楚說明要完成什麼，不要只說幫我看一下。'],
+            ['輸入', '提供 Tag、設備條件、現場限制、既有程式或題目原文。'],
+            ['輸出', '要求輸出格式，例如表格、SCL、Mermaid、規範書條列。'],
+            ['約束條件', '限制 AI 不可亂補，例如禁止使用不存在的 Sensor、Timer 必須給 PT、NC 接點要反相處理。']
+        ],
+        scenarios: [
+            ['PLC SCL 生成', '因為 SCL 程式需要明確輸入、輸出、變數區與限制條件。'],
+            ['招標規範書', '因為規範書不能有想像空間，必須定義交付範圍與驗收條件。'],
+            ['工程規格文件', '適合描述設備、I/O、控制條件、例外狀況。']
+        ],
+        prompt: '# 角色\n你是一位嚴謹的 Siemens TIA Portal SCL 工程師與 PLC 教學講師。\n\n# 任務\n請根據我提供的 I/O 條件與動作需求，產生可在 TIA Portal 使用的 SCL FUNCTION_BLOCK。\n\n# 輸入\n1. 所有 DI/DO Tag 名稱如下：請依照我提供的名稱，不可自行新增。\n2. NC 接點語意：TRUE 表示未觸發，FALSE 表示觸發。\n3. 動作需求：請逐條對應，不可省略。\n\n# 輸出\n請輸出完整 SCL 程式碼，包含 FUNCTION_BLOCK、VAR_INPUT、VAR_OUTPUT、VAR、BEGIN、END_FUNCTION_BLOCK。\n\n# 約束條件\n1. Timer 呼叫必須給定 PT。\n2. 不可使用不存在的 Sensor。\n3. 每一個 DO 只能由單一邏輯區塊負責。\n4. 若需求有矛盾，先列出矛盾點，不要直接生成程式。'
+    },
+    {
+        badge: '流程導向',
+        title: '框架 B：任務 / 背景 / 參考依據 / 評估標準 / 迭代優化',
+        tagline: '適合分析 Factory IO 場景、Debug、逐步優化 Prompt、建立 AI 與工程師協作流程。',
+        structure: [
+            ['任務', '說明本次要解決的工程問題，例如分析場景、找出錯誤、建立控制流程。'],
+            ['背景', '補充現場條件、設備狀態、目前遇到的限制。'],
+            ['參考依據', '提供原始程式、截圖、Tag 表、規範、前一版結果。'],
+            ['評估標準', '定義什麼叫正確，例如能連續運轉、無 DO 衝突、符合 NC 語意。'],
+            ['迭代優化', '要求 AI 先分析，再提出修正，不要一次跳到最終答案。']
+        ],
+        scenarios: [
+            ['Factory IO 場景觀察', '先建立現場語意，再判斷控制邏輯。'],
+            ['PLC Debug', 'Debug 需要根據現象、原因、測試結果逐步收斂。'],
+            ['Prompt 教學流程', '適合訓練學生一輪一輪修正問題，而不是亂問 AI。']
+        ],
+        prompt: '# 任務\n請協助我分析這個 Factory IO 場景的控制邏輯，先不要寫 SCL。\n\n# 背景\n我正在訓練學生用 AI 協作完成 PLC 控制設計。目標不是直接拿答案，而是建立可驗證的工程思路。\n\n# 參考依據\n我會提供場景截圖、Tag 表、DI/DO 語意，以及目前觀察到的物件動作。\n\n# 評估標準\n1. 必須先確認每一個 DI 是 NO 或 NC。\n2. 必須說明每一個 DO 的啟動條件與停止條件。\n3. 必須檢查是否有兩個邏輯同時控制同一個 DO。\n4. 若無法確認現場條件，請列出需要補充的問題。\n\n# 迭代優化\n請依照以下順序回答：\n1. 場景觀察\n2. Tag 語意鎖定\n3. 因果關係分析\n4. 狀態機建議\n5. 風險與缺口\n6. 下一輪應該問 AI 的 Prompt'
+    },
+    {
+        badge: '生成品質導向',
+        title: '框架 C：任務 / 背景 / 範例 / 角色 / 格式與語氣',
+        tagline: '適合製作教材、簡報、Email、公告、教學講稿，重點是讓輸出能被人直接使用。',
+        structure: [
+            ['任務', '說明要產生什麼內容，例如互動式 HTML、PPT 大綱、正式英文信。'],
+            ['背景', '說明使用對象、目的與情境，例如老師上課、學生自學、客戶簡報。'],
+            ['範例', '給 AI 一個可模仿的句型、段落或輸出風格。'],
+            ['角色', '指定 AI 的身份，例如專業講師、英文商務助理、課程設計顧問。'],
+            ['格式與語氣', '要求輸出格式、語氣、字數、是否口語、是否正式。']
+        ],
+        scenarios: [
+            ['互動式教學 HTML', '因為需要同時控制內容架構、教學語氣與畫面格式。'],
+            ['PPT 大綱與講稿', '需要明確頁面主題、重點、講者口吻。'],
+            ['正式商務 Email', '需要背景、角色、語氣與格式一致。']
+        ],
+        prompt: '# 任務\n請把以下 PLC 控制思路做成一頁互動式 HTML 教材。\n\n# 背景\n這份教材要給 PLC 初學者使用，目標是讓學生理解如何從自然語言轉成可執行的控制邏輯。\n\n# 範例\n請使用這種口語說法：\n『自保持不是把輸出硬開著，而是讓 PLC 記住一個工程狀態。按下啟動只是開始條件，停止條件才是安全邊界。』\n\n# 角色\n你是一位懂 Siemens SCL、Factory IO 與工業教學設計的 PLC 講師。\n\n# 格式與語氣\n1. 左邊列出主題，可以點選。\n2. 中間顯示專有名詞、為什麼這樣設計、SCL 範例。\n3. 下方有上一頁與下一頁按鈕。\n4. 語氣要像老師現場教學，清楚、口語、不要像百科全書。\n5. SCL 範例要簡短但能運作，不要只有示意。'
+    },
+    {
+        badge: '選型總表',
+        title: '應用場景總表：任務不同，Prompt 框架就不同',
+        tagline: '選 Prompt 框架的原則很簡單：要寫規格用 A，要做分析用 B，要產生教學或文字成品用 C。'
+    }
+];
+
+const pages = [
+    { title: '課程說明', render: renderCoursePage },
+    { title: '語言模型', render: renderLanguagePage },
+    { title: '錯誤與修正', render: renderErrorFixPage },
+    { title: 'Markdown', render: renderMarkdownPage },
+    { title: 'Prompt 框架 A / B / C', render: renderFrameworkPage },
+    { title: '標準流程', render: renderStandardFlowPage }
+];
+
+function escapeHtml(value){
+    return String(value).replace(/[&<>"']/g,function(ch){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+}
+
+function setPage(nextPage){page = nextPage; render();}
+function setSubView(nextView){subView = nextView; render();}
+function setMdView(nextView){mdView = nextView; render();}
+function setErrTab(nextTab){errTab = nextTab; render();}
+function setMdSection(nextSection){mdSection = nextSection; render();}
+function setFlowSection(nextSection){flowSection = nextSection; render();}
+function setFrameworkIndex(nextIndex){frameworkIndex = nextIndex; render();}
+function nextFramework(){frameworkIndex = (frameworkIndex + 1) % frameworkData.length; render();}
+function prevFramework(){frameworkIndex = (frameworkIndex - 1 + frameworkData.length) % frameworkData.length; render();}
+
+function renderCoursePage(){
+    return '<div class="card"><span class="badge">PLC × AI 教學標準模組</span><h2>課程目標</h2><p>本教材目標：讓學生理解「自然語言 → Markdown → SCL」的完整工程轉換流程，而不是把 AI 當成直接產生程式的黑盒子。</p><ul><li>辨識錯誤 Prompt 的工程缺口。</li><li>學會用 Markdown 把需求結構化。</li><li>理解 NC / NO、I/O、互鎖、自保持與優先權。</li><li>生成可驗證的 SCL，並用 Watch Table 驗證。</li></ul></div><div class="card"><h3>教學流程（老師用）</h3><ol><li>先給學生錯誤 Prompt。</li><li>請學生指出缺少的工程條件。</li><li>引導學生改寫成 Markdown。</li><li>再轉換成 SCL。</li><li>最後用 Watch Table 驗證輸出與狀態。</li></ol></div>';
+}
+
+function renderLanguagePage(){
+    return '<div class="card"><h2>三種語言模型</h2><table class="table"><thead><tr><th>類型</th><th>功能</th><th>優勢</th><th>最佳場景</th></tr></thead><tbody><tr><td>自然語言</td><td>描述需求</td><td>直覺、快速、低門檻</td><td>需求討論、初步構想</td></tr><tr><td>Markdown</td><td>結構化規格</td><td>分段、條列、可控</td><td>Prompt、教材、規格整理</td></tr><tr><td>工程語言</td><td>實際執行</td><td>精確、可編譯、可驗證</td><td>PLC 程式、SCL / ST 實作</td></tr></tbody></table></div><div class="card"><h3>AI 為何能理解自然語言</h3><p>AI 不是像人一樣真正理解語言，而是透過 Token、上下文與機率模型學習語意關聯。自然語言能啟動討論，但不適合直接作為 PLC 程式規格，因為它容易缺少 I/O、NC / NO、停止條件與優先權。</p></div>';
+}
+
+function renderErrorFixPage(){
+    return '<div class="card"><div class="tabs"><button class="tab ' + (subView === 'fail' ? 'active' : '') + '" type="button" data-subview="fail">錯誤案例</button><button class="tab ' + (subView === 'fix' ? 'active' : '') + '" type="button" data-subview="fix">三段對照</button></div>' + (subView === 'fail' ? failView() : compareView()) + '</div>';
+}
+
+function renderMarkdownPage(){
+    return '<div class="card"><div class="tabs"><button class="tab ' + (mdSection === 'overview' ? 'active' : '') + '" type="button" data-mdsection="overview">Markdown（工程本質）</button><button class="tab ' + (mdSection === 'skills' ? 'active' : '') + '" type="button" data-mdsection="skills">Markdown 工程技巧</button></div>' + (mdSection === 'overview' ? renderMarkdownOverview() : renderMarkdownSkills()) + '</div>';
+}
+
+function renderMarkdownOverview(){
+    return '<h2>Markdown（工程本質）</h2><p><b>重點：</b>Markdown 不是用來取代自然語言或工程語言，而是作為兩者之間的「橋接層」。</p><table class="table"><thead><tr><th>語言類型</th><th>特性</th><th>優勢</th><th>限制</th><th>最佳使用時機</th></tr></thead><tbody><tr><td>自然語言</td><td>口語描述</td><td>直覺、快速</td><td>模糊、不完整</td><td>需求討論、概念發想</td></tr><tr><td>Markdown</td><td>半結構化語言</td><td>可控、可拆解、可驗證</td><td>需要設計結構</td><td>Prompt工程、規格整理、教學</td></tr><tr><td>工程語言（SCL/ST）</td><td>可編譯程式</td><td>精確、可執行</td><td>撰寫成本高、不可模糊</td><td>最終實作、PLC控制</td></tr></tbody></table><p><b>結論：</b>不是哪一種語言比較好，而是要在正確的階段使用正確的語言。</p><ul><li>自然語言 → 用來「想」</li><li>Markdown → 用來「整理與約束」</li><li>工程語言 → 用來「執行」</li></ul>';
+}
+
+function renderMarkdownSkills(){
+    return '<h2>Markdown 工程技巧</h2><p>Markdown 工程技巧的核心是控制 AI 行為：分層、枚舉、鎖定輸出與固定流程。</p><ul><li>語意分層：用 # 切分階段。</li><li>約束枚舉：用 - 列出條件與限制。</li><li>輸出鎖定：用 code block 鎖定格式。</li><li>流程控制：用固定格式維持輸出一致性。</li></ul><div class="tabs">' + renderMarkdownTabs() + '</div>' + mdContent();
+}
+
+function renderFrameworkPage(){
+    return '<div class="framework-shell"><aside class="framework-side"><h2>Prompt 框架選擇器</h2><p>用工程思維選 Prompt，不是靠感覺抽籤。不同任務要用不同框架，否則 AI 很容易把規格寫成作文。</p>' + renderFrameworkNav() + '</aside><section class="framework-main">' + renderFrameworkContent() + '</section></div>';
+}
+
+function renderFrameworkNav(){
+    return frameworkData.map(function(item,index){
+        const label = index === 3 ? '應用場景總表' : item.title.replace('：','： ').split(' / ').slice(0,5).join(' / ');
+        return '<button class="framework-nav ' + (frameworkIndex === index ? 'active' : '') + '" type="button" data-framework="' + index + '">' + escapeHtml(label) + '</button>';
+    }).join('');
+}
+
+function renderFrameworkContent(){
+    if(frameworkIndex === 3){return renderFrameworkDecisionTable();}
+    const item = frameworkData[frameworkIndex];
+    return '<section class="hero"><span class="badge">' + escapeHtml(item.badge) + '</span><h2>' + escapeHtml(item.title) + '</h2><p>' + escapeHtml(item.tagline) + '</p></section><section class="content-grid"><div class="card"><h3>中文結構與用途</h3><div class="structure-list">' + item.structure.map(function(row){return '<div class="structure-item"><strong>' + escapeHtml(row[0]) + '：</strong>' + escapeHtml(row[1]) + '</div>';}).join('') + '</div></div><div class="card"><h3>適用應用場景</h3>' + item.scenarios.map(function(row){return '<div class="scenario"><div class="scenario-title">' + escapeHtml(row[0]) + '</div><div>' + escapeHtml(row[1]) + '</div></div>';}).join('') + '</div></section><section class="card"><h3>範例 Prompt</h3><div class="prompt">' + escapeHtml(item.prompt) + '</div></section><section class="footer-controls"><button class="control-btn" type="button" data-prev-framework="1">上一個</button><span>' + (frameworkIndex + 1) + ' / ' + frameworkData.length + '</span><button class="control-btn" type="button" data-next-framework="1">下一個</button></section>';
+}
+
+function renderFrameworkDecisionTable(){
+    const item = frameworkData[3];
+    return '<section class="hero"><span class="badge">' + escapeHtml(item.badge) + '</span><h2>' + escapeHtml(item.title) + '</h2><p>' + escapeHtml(item.tagline) + '</p></section><section class="card"><h3>哪一個應用場景，適合哪一個 Prompt 框架？</h3><table class="table"><thead><tr><th>應用場景</th><th>建議框架</th><th>原因</th><th>典型輸出</th></tr></thead><tbody><tr><td>PLC SCL 程式生成</td><td>框架 A</td><td>需要明確角色、輸入 Tag、輸出 DO、禁止條件與程式限制。</td><td>SCL / FB / FC / 狀態機程式</td></tr><tr><td>Factory IO 場景分析</td><td>框架 B</td><td>需要先觀察、建立背景、引用現場資料、評估邏輯，再逐步修正。</td><td>控制流程、FSM、Tag 語意表</td></tr><tr><td>教學講義、簡報、教材</td><td>框架 C</td><td>需要範例、角色定位、格式與語氣，讓內容可直接教學使用。</td><td>講義、PPT 大綱、課程腳本</td></tr><tr><td>招標規範書</td><td>框架 A</td><td>規格書重點是範圍、交付項目、限制條件與驗收標準。</td><td>條列式規範、驗收條款</td></tr><tr><td>錯誤排除與 Debug</td><td>框架 B</td><td>Debug 必須有背景、參考現象、評估結果與迭代修正。</td><td>檢查步驟、原因分析、修正版</td></tr><tr><td>商務 Email / 正式公告</td><td>框架 C</td><td>重點是任務、背景、範例語氣、角色與輸出格式。</td><td>正式英文信、公告文、邀請函</td></tr><tr><td>標準化 AI 協作流程</td><td>框架 B + A</td><td>先用 B 做分析與迭代，再用 A 鎖定規格並產出結果。</td><td>方法論、流程圖、最終 Prompt</td></tr></tbody></table></section><section class="footer-controls"><button class="control-btn" type="button" data-prev-framework="1">上一個</button><span>' + (frameworkIndex + 1) + ' / ' + frameworkData.length + '</span><button class="control-btn" type="button" data-next-framework="1">下一個</button></section>';
+}
+
+function renderStandardFlowPage(){
+    return '<div class="card"><div class="tabs"><button class="tab ' + (flowSection === 'overview' ? 'active' : '') + '" type="button" data-flowsection="overview">PLC × AI 標準流程</button><button class="tab ' + (flowSection === 'example' ? 'active' : '') + '" type="button" data-flowsection="example">範例內容</button></div>' + (flowSection === 'overview' ? renderStandardFlowOverview() : renderStandardFlowExample()) + '</div>';
+}
+
+function renderStandardFlowOverview(){
+    return '<h2>PLC × AI 標準流程</h2><ol><li>語意鎖定：先確認題目、I/O、NC / NO，不做推論。</li><li>行為描述：把文字轉成可觀測行為。</li><li>FSM 建模：定義狀態、事件、動作、下一狀態。</li><li>DO Owner：確認每一個輸出只有一個責任來源。</li><li>SCL 生成：把已鎖定的設計轉成程式。</li><li>驗證：使用 Watch Table 檢查狀態、輸出與條件。</li></ol>';
+}
+
+function renderStandardFlowExample(){
+    const stage1 = '# Stage 1：語意鎖定\n題目：輸送帶物件在 Sensor_A 與 Sensor_B 之間來回移動。\nDI：Sensor_A、Sensor_B、Stop。\nDO：Conveyor_CW、Conveyor_CCW。\nSensor_A / Sensor_B 為 NC：TRUE=無物件，FALSE=有物件。\n禁止在此階段寫程式。';
+    const stage2 = '# Stage 2：行為描述\n當物件觸發 Sensor_A，系統需要往 B 方向移動。\n當物件觸發 Sensor_B，系統需要往 A 方向移動。\nStop 按下時，所有輸出必須停止。';
+    const stage3 = '# Stage 3：FSM 建模\nState 0：Idle\nState 10：Move_To_B\nState 20：Move_To_A\nEvent：Sensor_A 觸發 / Sensor_B 觸發 / Stop 按下';
+    const stage4 = '# Stage 4：DO Owner\nConveyor_CW 由 Move_To_B 狀態負責。\nConveyor_CCW 由 Move_To_A 狀態負責。\nStop 為全域最高優先權。';
+    const stage5 = '# Stage 5：SCL 轉換與驗證\n以 CASE #State 撰寫狀態機。\n使用 Watch Table 監看 State、Sensor_A、Sensor_B、Conveyor_CW、Conveyor_CCW。\n驗證條件：不得同時正反轉。';
+    return '<h2>標準流程範例：輸送帶來回控制</h2><p>這個範例示範同一個控制問題如何從自然語言逐步轉成可驗證的工程規格。</p><div class="grid2"><div><h3>1. 語意鎖定</h3><div class="prompt">' + escapeHtml(stage1) + '</div></div><div><h3>2. 行為描述</h3><div class="prompt">' + escapeHtml(stage2) + '</div></div><div><h3>3. FSM 建模</h3><div class="prompt">' + escapeHtml(stage3) + '</div></div><div><h3>4. DO Owner</h3><div class="prompt">' + escapeHtml(stage4) + '</div></div></div><div class="card"><h3>5. SCL 轉換與驗證</h3><div class="prompt">' + escapeHtml(stage5) + '</div></div>';
+}
+
+function renderMarkdownTabs(){
+    return Object.keys(mdExamples).map(function(key){
+        const label = mdExamples[key].title.split('：')[0];
+        return '<button class="tab ' + (mdView === key ? 'active' : '') + '" type="button" data-mdview="' + escapeHtml(key) + '">' + escapeHtml(label) + '</button>';
+    }).join('');
+}
+
+function failView(){
+    return '<h2>失敗的自然語言範例</h2><div class="prompt">幫我寫一個輸送帶控制，讓東西可以來回跑，然後要安全一點，不要壞掉。</div><ul><li>缺少 DI / DO。</li><li>缺少 NC / NO。</li><li>沒有定義「來回跑」的觸發條件與停止條件。</li><li>「安全一點」無法直接轉換成可驗證邏輯。</li></ul><h3>AI 可能產生的錯誤程式格式</h3><div class="tabs">' + errorTabs.map(function(t,i){ return '<button class="tab ' + (i === errTab ? 'active' : '') + '" type="button" data-errtab="' + i + '">' + escapeHtml(t.title) + '</button>'; }).join('') + '</div>' + renderError();
+}
+
+function renderError(){
+    const t = errorTabs[errTab];
+    return '<div class="grid2"><div><h3>範例代碼</h3><div class="prompt">' + escapeHtml(t.code) + '</div></div><div><h3>問題點</h3><ul>' + t.issues.map(function(issue){ return '<li>' + escapeHtml(issue) + '</li>'; }).join('') + '</ul></div></div>';
+}
+
+function compareView(){
+    const mdText = '# 任務\n輸送帶來回控制\n\n# 輸入\n- Sensor_A：NC（TRUE=無物件）\n- Sensor_B：NC（TRUE=無物件）\n- Stop：NC（TRUE=正常）\n\n# 輸出\n- Conveyor_CW\n- Conveyor_CCW\n\n# 行為\n1. Sensor_A 觸發時，啟動正轉。\n2. Sensor_B 觸發時，停止正轉並啟動反轉。\n3. Stop 按下時，全部停止。\n\n# 約束\n- Stop 最高優先。\n- 不可同時正反轉。\n- NC 訊號必須反相處理。';
+    const sclText = 'FUNCTION_BLOCK FB_Conveyor\nVAR_INPUT\n    Sensor_A : BOOL;\n    Sensor_B : BOOL;\n    Stop     : BOOL;\nEND_VAR\nVAR_OUTPUT\n    Conveyor_CW  : BOOL;\n    Conveyor_CCW : BOOL;\nEND_VAR\nVAR\n    Run_CW  : BOOL;\n    Run_CCW : BOOL;\nEND_VAR\nBEGIN\n    IF NOT Stop THEN\n        Run_CW := FALSE;\n        Run_CCW := FALSE;\n    ELSIF NOT Sensor_A THEN\n        Run_CW := TRUE;\n        Run_CCW := FALSE;\n    ELSIF NOT Sensor_B THEN\n        Run_CW := FALSE;\n        Run_CCW := TRUE;\n    END_IF;\n\n    Conveyor_CW := Run_CW AND NOT Run_CCW;\n    Conveyor_CCW := Run_CCW AND NOT Run_CW;\nEND_FUNCTION_BLOCK';
+    return '<h2>三段對照（教學核心）</h2><p><b>關鍵：</b>Markdown 把模糊需求轉成可驗證條件。</p><div class="grid"><div><h3>錯誤 Prompt</h3><div class="prompt">幫我寫輸送帶控制</div><ul><li>缺少 I/O。</li><li>缺少 NC / NO。</li><li>缺少停止條件。</li></ul></div><div><h3>Markdown 修正</h3><div class="prompt">' + escapeHtml(mdText) + '</div></div><div><h3>正確 SCL</h3><div class="prompt">' + escapeHtml(sclText) + '</div></div></div>';
+}
+
+function mdContent(){
+    const item = mdExamples[mdView] || mdExamples.heading;
+    return '<div class="card"><h3>' + escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.description) + '</p><div class="prompt">' + escapeHtml(item.prompt) + '</div></div>';
+}
+
+function render(){
+    document.getElementById('menu').innerHTML = pages.map(function(p,i){ return '<div class="item ' + (i === page ? 'active' : '') + '" data-page="' + i + '">' + escapeHtml(p.title) + '</div>'; }).join('');
+    document.getElementById('main').innerHTML = pages[page].render();
+    bindEvents();
+}
+
+function bindEvents(){
+    document.querySelectorAll('[data-page]').forEach(function(element){element.addEventListener('click',function(){ setPage(Number(element.getAttribute('data-page'))); });});
+    document.querySelectorAll('[data-subview]').forEach(function(element){element.addEventListener('click',function(){ setSubView(element.getAttribute('data-subview')); });});
+    document.querySelectorAll('[data-mdview]').forEach(function(element){element.addEventListener('click',function(){ setMdView(element.getAttribute('data-mdview')); });});
+    document.querySelectorAll('[data-mdsection]').forEach(function(element){element.addEventListener('click',function(){ setMdSection(element.getAttribute('data-mdsection')); });});
+    document.querySelectorAll('[data-flowsection]').forEach(function(element){element.addEventListener('click',function(){ setFlowSection(element.getAttribute('data-flowsection')); });});
+    document.querySelectorAll('[data-errtab]').forEach(function(element){element.addEventListener('click',function(){ setErrTab(Number(element.getAttribute('data-errtab'))); });});
+    document.querySelectorAll('[data-framework]').forEach(function(element){element.addEventListener('click',function(){ setFrameworkIndex(Number(element.getAttribute('data-framework'))); });});
+    document.querySelectorAll('[data-prev-framework]').forEach(function(element){element.addEventListener('click',prevFramework);});
+    document.querySelectorAll('[data-next-framework]').forEach(function(element){element.addEventListener('click',nextFramework);});
+}
+
+function runTests(){
+    console.assert(Array.isArray(pages) && pages.length === 6,'pages should contain 6 items');
+    console.assert(Array.isArray(errorTabs) && errorTabs.length === 4,'errorTabs should contain 4 items');
+    console.assert(Array.isArray(frameworkData) && frameworkData.length === 4,'frameworkData should contain 4 items');
+    console.assert(typeof failView() === 'string' && failView().includes('失敗的自然語言'),'failView should render');
+    console.assert(typeof compareView() === 'string' && compareView().includes('正確 SCL'),'compareView should render');
+    console.assert(typeof mdContent() === 'string' && mdContent().includes('prompt'),'mdContent should render');
+    console.assert(typeof renderMarkdownOverview() === 'string' && renderMarkdownOverview().includes('橋接層'),'renderMarkdownOverview should render overview');
+    console.assert(typeof renderMarkdownSkills() === 'string' && renderMarkdownSkills().includes('Markdown 工程技巧'),'renderMarkdownSkills should render skills');
+    console.assert(typeof renderFrameworkPage() === 'string' && renderFrameworkPage().includes('Prompt 框架選擇器'),'renderFrameworkPage should render framework selector');
+    console.assert(typeof renderStandardFlowOverview() === 'string' && renderStandardFlowOverview().includes('PLC × AI 標準流程'),'renderStandardFlowOverview should render overview');
+    console.assert(typeof renderStandardFlowExample() === 'string' && renderStandardFlowExample().includes('輸送帶來回控制'),'renderStandardFlowExample should render example');
+    console.assert(escapeHtml('<x>') === '&lt;x&gt;','escapeHtml should escape HTML');
+}
+
+runTests();
+render();
+</script>
+</body>
+</html>

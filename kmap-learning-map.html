@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>K-Map 互動式教學平台</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: #111827;
+            --panel2: #172033;
+            --card: #1f2937;
+            --line: #334155;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent2: #22c55e;
+            --warn: #f59e0b;
+            --bad: #ef4444;
+            --good: #10b981;
+            --purple: #a78bfa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+            background: radial-gradient(circle at top left, #1e3a8a 0, #0b1220 35%, #020617 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .app {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        aside {
+            background: rgba(15, 23, 42, 0.92);
+            border-right: 1px solid var(--line);
+            padding: 22px 16px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .brand {
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.08);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .progress-box {
+            margin: 12px 0 18px 0;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: #020617;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width 0.3s ease;
+        }
+
+        .lesson-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lesson-btn {
+            width: 100%;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .lesson-btn span {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .lesson-btn:hover {
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .lesson-btn.active {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.16);
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12) inset;
+        }
+
+        main {
+            padding: 24px;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .hero-card, .panel {
+            background: rgba(17, 24, 39, 0.86);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+        }
+
+        .hero h2 {
+            margin: 0 0 10px 0;
+            font-size: 30px;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .tag {
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #bae6fd;
+            background: rgba(56, 189, 248, 0.08);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .lesson-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .lesson-title h3 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .pill {
+            white-space: nowrap;
+            border-radius: 999px;
+            padding: 7px 12px;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #bbf7d0;
+            background: rgba(34, 197, 94, 0.08);
+            font-size: 12px;
+        }
+
+        .section {
+            margin: 16px 0;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .section h4 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #e0f2fe;
+        }
+
+        .section p, .section li {
+            color: var(--muted);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        .section ul {
+            margin: 8px 0 0 20px;
+            padding: 0;
+        }
+
+        .code {
+            font-family: Consolas, Monaco, monospace;
+            background: #020617;
+            color: #d1fae5;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            padding: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .kmap-box {
+            position: sticky;
+            top: 20px;
+        }
+
+        .kmap-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        button.control {
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            padding: 9px 11px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        button.control:hover {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .truth-table, .kmap-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 5px;
+            table-layout: fixed;
+        }
+
+        .truth-table th, .truth-table td, .kmap-table th, .kmap-table td {
+            text-align: center;
+            border-radius: 10px;
+            padding: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.75);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .truth-table tr.active td {
+            background: rgba(56, 189, 248, 0.18);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .truth-table td.out1, .kmap-cell.one {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.55);
+            color: #bbf7d0;
+            font-weight: 700;
+        }
+
+        .kmap-cell {
+            height: 62px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .kmap-cell:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .kmap-cell.focus {
+            outline: 3px solid var(--accent);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.3);
+        }
+
+        .kmap-cell.group-ab {
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.8) inset;
+        }
+
+        .kmap-cell.group-ac {
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.85) inset;
+        }
+
+        .kmap-cell.group-bc {
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.9) inset;
+        }
+
+        .kmap-label {
+            font-size: 11px;
+            color: var(--muted);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .formula-box {
+            margin-top: 12px;
+            background: rgba(2, 6, 23, 0.72);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 16px;
+            padding: 14px;
+            line-height: 1.7;
+        }
+
+        .formula-box strong {
+            color: #bae6fd;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .quiz-card {
+            background: rgba(17, 24, 39, 0.86);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .quiz-card h4 {
+            margin: 0 0 8px 0;
+            color: #e0f2fe;
+        }
+
+        .quiz-card p {
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .answer {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.28);
+            color: #bbf7d0;
+            line-height: 1.6;
+        }
+
+        .faq {
+            margin-top: 18px;
+        }
+
+        details {
+            background: rgba(17, 24, 39, 0.86);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+        }
+
+        summary {
+            cursor: pointer;
+            color: #e0f2fe;
+            font-weight: 700;
+        }
+
+        details p {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .footer-area {
+            margin-top: 22px;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 1100px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+            aside {
+                position: relative;
+                height: auto;
+            }
+            .hero, .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .kmap-box {
+                position: relative;
+                top: auto;
+            }
+        }
+
+        @media (max-width: 700px) {
+            main {
+                padding: 14px;
+            }
+            .quiz-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside>
+            <div class="brand">
+                <h1>K-Map 教學地圖</h1>
+                <p>從問題語意、Truth Table、SOP、K-map 到 SCL 實作，建立可驗證的邏輯建模流程。</p>
+            </div>
+            <div class="progress-box">
+                <div class="progress-label">
+                    <span>課程進度</span>
+                    <span id="progressText">1 / 8</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            </div>
+            <div class="lesson-list" id="lessonList"></div>
+        </aside>
+
+        <main>
+            <section class="hero">
+                <div class="hero-card">
+                    <h2>從 0 開始學 K-map</h2>
+                    <p>這份教材的目標不是讓學生背公式，而是讓學生理解：K-map 是把 Truth Table 變成可視化群組，再把群組轉回可維護的邏輯式與 PLC 程式。換句話說，K-map 是「數學正確」走向「工程可用」的轉接頭。</p>
+                    <div class="tag-row">
+                        <span class="tag">Truth Table</span>
+                        <span class="tag">SOP</span>
+                        <span class="tag">Gray Code</span>
+                        <span class="tag">K-map Grouping</span>
+                        <span class="tag">SCL</span>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <h2>本頁範例</h2>
+                    <p>三個輸入 A、B、C。當至少兩個輸入為 ON 時，OUT = 1。這是 K-map 入門最好的範例之一：足夠簡單，但又能看出化簡的價值。</p>
+                    <div class="formula-box"><strong>目標結果：</strong><br />OUT = AB + AC + BC<br />SCL：#OUT := (#A AND #B) OR (#A AND #C) OR (#B AND #C);</div>
+                </div>
+            </section>
+
+            <section class="content-grid">
+                <div class="panel">
+                    <div class="lesson-title">
+                        <h3 id="lessonTitle"></h3>
+                        <span class="pill" id="lessonStage"></span>
+                    </div>
+                    <div id="lessonContent"></div>
+                    <div class="nav-row">
+                        <button class="control" onclick="prevLesson()">上一課</button>
+                        <button class="control" onclick="nextLesson()">下一課</button>
+                    </div>
+                </div>
+
+                <div class="panel kmap-box">
+                    <div class="lesson-title">
+                        <h3>互動教學區</h3>
+                        <span class="pill">K-map Lab</span>
+                    </div>
+                    <div class="kmap-controls">
+                        <button class="control" onclick="showAllTruth()">顯示 Truth Table</button>
+                        <button class="control" onclick="highlightGroup('ab')">群組 AB</button>
+                        <button class="control" onclick="highlightGroup('ac')">群組 AC</button>
+                        <button class="control" onclick="highlightGroup('bc')">群組 BC</button>
+                        <button class="control" onclick="clearHighlight()">清除標示</button>
+                    </div>
+                    <div class="section">
+                        <h4>Truth Table</h4>
+                        <table class="truth-table" id="truthTable"></table>
+                    </div>
+                    <div class="section">
+                        <h4>3 變數 K-map：列 A，欄 BC 使用 Gray Code</h4>
+                        <table class="kmap-table" id="kmapTable"></table>
+                        <div class="formula-box" id="explainBox"><strong>操作提示：</strong><br />點 Truth Table 的任一列，右側 K-map 對應格會亮起。按下群組按鈕可以觀察 AB、AC、BC 三個化簡項如何形成。</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="footer-area">
+                <div class="panel faq">
+                    <div class="lesson-title">
+                        <h3>FAQ</h3>
+                        <span class="pill">常見問題</span>
+                    </div>
+                    <details open>
+                        <summary>Q1：K-map 是不是一開始就要教？</summary>
+                        <p>不是。K-map 應該放在 Truth Table 之後。學生必須先知道所有輸入組合與輸出結果，K-map 才有意義。否則只是畫格子，不是在建模。</p>
+                    </details>
+                    <details>
+                        <summary>Q2：為什麼 K-map 的欄位是 00、01、11、10？</summary>
+                        <p>因為這是 Gray Code，相鄰欄位只差一個 bit。K-map 的群組成立，是因為相鄰格只有一個變數改變，因此可以消去該變數。</p>
+                    </details>
+                    <details>
+                        <summary>Q3：K-map 什麼時候不好用？</summary>
+                        <p>當問題有時間順序、記憶、步驟、互鎖、延遲、邊緣觸發時，K-map 就不是主工具。這些問題應該轉向 FSM、Latch、Timer 或狀態表。</p>
+                    </details>
+                    <details>
+                        <summary>Q4：K-map 和 PLC SCL 的關係是什麼？</summary>
+                        <p>K-map 負責把組合邏輯化簡，SCL 負責把化簡後的邏輯實作。K-map 不是 PLC 程式，但它能幫助你產生更清楚、更可維護的 SCL 條件式。</p>
+                    </details>
+                </div>
+
+                <div class="panel faq">
+                    <div class="lesson-title">
+                        <h3>練習題</h3>
+                        <span class="pill">Practice</span>
+                    </div>
+                    <div class="quiz-grid">
+                        <div class="quiz-card">
+                            <h4>練習 1：任兩個以上 ON</h4>
+                            <p>A、B、C 中至少兩個為 ON，OUT = 1。請寫出 Truth Table、SOP、化簡式與 SCL。</p>
+                            <button class="control" onclick="toggleAnswer('a1')">顯示答案</button>
+                            <div class="answer" id="a1">OUT = AB + AC + BC<br />#OUT := (#A AND #B) OR (#A AND #C) OR (#B AND #C);</div>
+                        </div>
+                        <div class="quiz-card">
+                            <h4>練習 2：奇數個 ON</h4>
+                            <p>A、B、C 中有奇數個為 ON，OUT = 1。觀察 K-map 是否容易形成大群組。</p>
+                            <button class="control" onclick="toggleAnswer('a2')">顯示答案</button>
+                            <div class="answer" id="a2">OUT = A XOR B XOR C<br />這題不是典型 AND-OR 化簡題，而是 Parity / XOR 結構。</div>
+                        </div>
+                        <div class="quiz-card">
+                            <h4>練習 3：A 優先</h4>
+                            <p>若 A=1 則 OUT=1；若 A=0，再由 B 與 C 決定。這題是否適合 K-map？</p>
+                            <button class="control" onclick="toggleAnswer('a3')">顯示答案</button>
+                            <div class="answer" id="a3">可以用 K-map 化簡，但教學上更應引導學生看到 Priority 結構。若規則有明確優先順序，SCL 常用 IF / ELSIF 表達。</div>
+                        </div>
+                        <div class="quiz-card">
+                            <h4>練習 4：按下 Start 後保持輸出</h4>
+                            <p>Start 按下後 OUT 保持 ON，Stop 按下後 OUT OFF。這題能用 K-map 嗎？</p>
+                            <button class="control" onclick="toggleAnswer('a4')">顯示答案</button>
+                            <div class="answer" id="a4">不適合只用 K-map，因為這題有記憶。應使用 Latch 或 FSM。這是組合邏輯與循序邏輯的分界題。</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const lessons = [
+            {
+                stage: "Step 0",
+                title: "問題情境：從自然語言開始",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>讓學生先看懂題目，不急著寫公式。工程訓練最常見的錯誤，是把還沒定義清楚的需求直接丟進程式。</p></div>
+                    <div class="section"><h4>範例題目</h4><p>有三個 NO 感測器 A、B、C。當至少兩個感測器為 ON 時，OUT = 1；其他情況 OUT = 0。</p></div>
+                    <div class="section"><h4>學生產出</h4><div class="code">輸入：A, B, C\n輸出：OUT\n條件：至少兩個輸入為 ON</div></div>
+                `
+            },
+            {
+                stage: "Step 1",
+                title: "語意鎖定：禁止腦補",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>確認題目只要求組合邏輯，沒有時間、順序、保持、延遲、邊緣觸發。這一步是在防止學生把簡單問題寫成大型機台控制程式。</p></div>
+                    <div class="section"><h4>判斷</h4><ul><li>A、B、C 是輸入條件。</li><li>OUT 是輸出結果。</li><li>沒有 Timer。</li><li>沒有 State。</li><li>沒有 Start/Stop 自保持。</li></ul></div>
+                    <div class="section"><h4>學生產出</h4><div class="code">這是一個組合邏輯問題。\n目前不需要 FSM、Timer、Latch。</div></div>
+                `
+            },
+            {
+                stage: "Step 2",
+                title: "行為轉換：口語變成條件式",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>把「至少兩個 ON」翻成可以觀察的條件。這一步是 K-map 前的工程語言轉換。</p></div>
+                    <div class="section"><h4>條件拆解</h4><ul><li>A 與 B 同時 ON。</li><li>A 與 C 同時 ON。</li><li>B 與 C 同時 ON。</li></ul></div>
+                    <div class="section"><h4>學生產出</h4><div class="code">OUT = 1 的情況：\nA=1 且 B=1\nA=1 且 C=1\nB=1 且 C=1</div></div>
+                `
+            },
+            {
+                stage: "Step 3",
+                title: "Truth Table：建立完全正確模型",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>Truth Table 是第一個完整模型。K-map 不是取代 Truth Table，而是把 Truth Table 重新排列成更容易看出群組的形式。</p></div>
+                    <div class="section"><h4>操作方式</h4><p>請點選右側 Truth Table 每一列，觀察 K-map 對應格子的位置。學生要理解：每一列真值表，都對應 K-map 的一個格子。</p></div>
+                    <div class="section"><h4>學生產出</h4><div class="code">000 -> 0\n001 -> 0\n010 -> 0\n011 -> 1\n100 -> 0\n101 -> 1\n110 -> 1\n111 -> 1</div></div>
+                `
+            },
+            {
+                stage: "Step 4",
+                title: "SOP：先得到數學正確式",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>把 Truth Table 中 OUT=1 的列轉成標準和項。這個式子通常正確，但不一定好讀，也不一定適合工程維護。</p></div>
+                    <div class="section"><h4>由 OUT=1 的列建立 minterm</h4><ul><li>011 -> A'BC</li><li>101 -> AB'C</li><li>110 -> ABC'</li><li>111 -> ABC</li></ul></div>
+                    <div class="section"><h4>學生產出</h4><div class="code">OUT = A'BC + AB'C + ABC' + ABC</div></div>
+                `
+            },
+            {
+                stage: "Step 5",
+                title: "K-map：把 SOP 變成群組問題",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>K-map 的核心是相鄰格。相鄰格只有一個變數不同，因此可以消去該變數。這不是魔術，是變數消去。</p></div>
+                    <div class="section"><h4>操作方式</h4><p>請按右側的群組 AB、AC、BC。觀察每個群組都由兩個相鄰的 1 組成，並且各自消去一個變數。</p></div>
+                    <div class="section"><h4>學生產出</h4><div class="code">AB 群組：C 變化，所以消去 C -> AB\nAC 群組：B 變化，所以消去 B -> AC\nBC 群組：A 變化，所以消去 A -> BC</div></div>
+                `
+            },
+            {
+                stage: "Step 6",
+                title: "化簡結果：由圖形回到邏輯式",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>學生要知道，K-map 的輸出不是圖，而是化簡後的邏輯式。圖只是中間工具，最後要回到可實作的工程表示。</p></div>
+                    <div class="section"><h4>化簡式</h4><div class="code">OUT = AB + AC + BC</div></div>
+                    <div class="section"><h4>工程語言說明</h4><p>只要三個輸入中任兩個同時成立，輸出就成立。這是典型 AND-OR 組合邏輯。</p></div>
+                `
+            },
+            {
+                stage: "Step 7",
+                title: "SCL 實作與驗證",
+                html: `
+                    <div class="section"><h4>教學目標</h4><p>最後才寫 SCL。程式不是猜出來的，而是由需求、Truth Table、K-map 化簡一路推導出來的。這樣學生比較不會把 AI 當算命師，工程界已經有夠多不可控變數了。</p></div>
+                    <div class="section"><h4>SCL 產出</h4><div class="code">#OUT := (#A AND #B) OR (#A AND #C) OR (#B AND #C);</div></div>
+                    <div class="section"><h4>驗證方法</h4><ul><li>A=1, B=1, C=0 -> OUT=1</li><li>A=1, B=0, C=1 -> OUT=1</li><li>A=0, B=1, C=1 -> OUT=1</li><li>A=1, B=0, C=0 -> OUT=0</li></ul></div>
+                `
+            }
+        ];
+
+        const truthRows = [
+            {a:0,b:0,c:0,out:0},
+            {a:0,b:0,c:1,out:0},
+            {a:0,b:1,c:0,out:0},
+            {a:0,b:1,c:1,out:1},
+            {a:1,b:0,c:0,out:0},
+            {a:1,b:0,c:1,out:1},
+            {a:1,b:1,c:0,out:1},
+            {a:1,b:1,c:1,out:1}
+        ];
+
+        const kmapCells = [
+            {a:0,bc:"00", key:"000", out:0},
+            {a:0,bc:"01", key:"001", out:0},
+            {a:0,bc:"11", key:"011", out:1, groups:["bc"]},
+            {a:0,bc:"10", key:"010", out:0},
+            {a:1,bc:"00", key:"100", out:0},
+            {a:1,bc:"01", key:"101", out:1, groups:["ac"]},
+            {a:1,bc:"11", key:"111", out:1, groups:["ab","ac","bc"]},
+            {a:1,bc:"10", key:"110", out:1, groups:["ab"]}
+        ];
+
+        let currentLesson = 0;
+
+        function init() {
+            renderLessonList();
+            renderLesson();
+            renderTruthTable();
+            renderKmap();
+        }
+
+        function renderLessonList() {
+            const list = document.getElementById("lessonList");
+            list.innerHTML = lessons.map((lesson, index) => `
+                <button class="lesson-btn ${index === currentLesson ? "active" : ""}" onclick="goLesson(${index})">
+                    ${lesson.stage} ${lesson.title}
+                    <span>${getShortText(index)}</span>
+                </button>
+            `).join("");
+        }
+
+        function getShortText(index) {
+            const text = [
+                "自然語言題目",
+                "輸入輸出與限制",
+                "條件拆解",
+                "完整模型",
+                "標準和項",
+                "群組與消去",
+                "化簡式",
+                "PLC 程式與驗證"
+            ];
+            return text[index];
+        }
+
+        function renderLesson() {
+            const lesson = lessons[currentLesson];
+            document.getElementById("lessonTitle").innerHTML = lesson.title;
+            document.getElementById("lessonStage").innerHTML = lesson.stage;
+            document.getElementById("lessonContent").innerHTML = lesson.html;
+            document.getElementById("progressText").innerText = `${currentLesson + 1} / ${lessons.length}`;
+            document.getElementById("progressFill").style.width = `${((currentLesson + 1) / lessons.length) * 100}%`;
+            renderLessonList();
+        }
+
+        function goLesson(index) {
+            currentLesson = index;
+            renderLesson();
+        }
+
+        function nextLesson() {
+            currentLesson = Math.min(currentLesson + 1, lessons.length - 1);
+            renderLesson();
+        }
+
+        function prevLesson() {
+            currentLesson = Math.max(currentLesson - 1, 0);
+            renderLesson();
+        }
+
+        function renderTruthTable(activeKey = null) {
+            const table = document.getElementById("truthTable");
+            table.innerHTML = `
+                <tr><th>A</th><th>B</th><th>C</th><th>OUT</th></tr>
+                ${truthRows.map(row => {
+                    const key = `${row.a}${row.b}${row.c}`;
+                    return `<tr class="${activeKey === key ? "active" : ""}" onclick="focusCell('${key}')">
+                        <td>${row.a}</td><td>${row.b}</td><td>${row.c}</td><td class="${row.out ? "out1" : ""}">${row.out}</td>
+                    </tr>`;
+                }).join("")}
+            `;
+        }
+
+        function renderKmap(activeKey = null, group = null) {
+            const table = document.getElementById("kmapTable");
+            const row0 = kmapCells.slice(0,4).map(cellHtml).join("");
+            const row1 = kmapCells.slice(4,8).map(cellHtml).join("");
+            table.innerHTML = `
+                <tr><th>A / BC</th><th>00</th><th>01</th><th>11</th><th>10</th></tr>
+                <tr><th>A=0</th>${row0}</tr>
+                <tr><th>A=1</th>${row1}</tr>
+            `;
+
+            function cellHtml(cell) {
+                const focus = activeKey === cell.key ? "focus" : "";
+                const one = cell.out ? "one" : "";
+                const groupClass = group && cell.groups && cell.groups.includes(group) ? `group-${group}` : "";
+                return `<td class="kmap-cell ${one} ${focus} ${groupClass}" onclick="focusCell('${cell.key}')">
+                    ${cell.out}<span class="kmap-label">${cell.key}</span>
+                </td>`;
+            }
+        }
+
+        function focusCell(key) {
+            clearHighlight(false);
+            renderTruthTable(key);
+            renderKmap(key, null);
+            document.getElementById("explainBox").innerHTML = `<strong>目前選取：</strong><br />Truth Table ${key} 對應到 K-map 的一個格子。若 OUT=1，該格可以參與群組化簡；若 OUT=0，不能被圈入一般 SOP 群組。`;
+        }
+
+        function showAllTruth() {
+            renderTruthTable(null);
+            renderKmap(null, null);
+            document.getElementById("explainBox").innerHTML = `<strong>Truth Table 對應：</strong><br />每一列 Truth Table 對應 K-map 的一個格子。K-map 只是重新排列，重點是讓相鄰格只差一個 bit。`;
+        }
+
+        function highlightGroup(group) {
+            renderTruthTable(null);
+            renderKmap(null, group);
+            const text = {
+                ab: "AB 群組包含 110 與 111。C 從 0 變 1，但 A、B 維持 1，所以消去 C，得到 AB。",
+                ac: "AC 群組包含 101 與 111。B 從 0 變 1，但 A、C 維持 1，所以消去 B，得到 AC。",
+                bc: "BC 群組包含 011 與 111。A 從 0 變 1，但 B、C 維持 1，所以消去 A，得到 BC。"
+            };
+            document.getElementById("explainBox").innerHTML = `<strong>群組 ${group.toUpperCase()}：</strong><br />${text[group]}`;
+        }
+
+        function clearHighlight(resetText = true) {
+            renderTruthTable(null);
+            renderKmap(null, null);
+            if (resetText) {
+                document.getElementById("explainBox").innerHTML = `<strong>操作提示：</strong><br />點 Truth Table 的任一列，右側 K-map 對應格會亮起。按下群組按鈕可以觀察 AB、AC、BC 三個化簡項如何形成。`;
+            }
+        }
+
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === "block" ? "none" : "block";
+        }
+
+        init();
+    </script>
+</body>
+</html>
